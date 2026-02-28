@@ -3,6 +3,10 @@ options:
   bundleIdPrefix: com.shopsmart
   deploymentTarget:
     iOS: "17.0"
+packages:
+  FirebaseSDK:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: "11.0.0"
 targets:
   ShopSmart:
     type: application
@@ -10,6 +14,11 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: ShopSmart
+    dependencies:
+      - package: FirebaseSDK
+        product: FirebaseAuth
+      - package: FirebaseSDK
+        product: FirebaseFirestore
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.shopsmart.ShopSmart

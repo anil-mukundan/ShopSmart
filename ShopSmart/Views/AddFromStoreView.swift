@@ -1,28 +1,23 @@
 import SwiftUI
-import SwiftData
 
 struct AddFromStoreView: View {
-    @Environment(\.modelContext) private var modelContext
+    @Environment(AppDataStore.self) private var dataStore
     @Environment(\.dismiss) private var dismiss
-    @Query private var allFrequencies: [StoreItemFrequency]
 
-    let shoppingList: ShoppingList
-    let store: Store
+    let shoppingList: ShoppingListModel
+    let store: StoreModel
 
-    @State private var selectedItemIDs: Set<PersistentIdentifier> = []
+    @State private var selectedItemIDs: Set<String> = []
 
-    /// Store items that aren't already in this list, sorted by frequency then name.
-    private var candidateItems: [Item] {
-        let existingIDs = Set(shoppingList.entries.compactMap { $0.item?.id })
+    private var candidateItems: [ItemModel] {
+        let existingIDs = Set(dataStore.entries(forListID: shoppingList.id).map(\.itemID))
 
-        var freqMap: [PersistentIdentifier: Int] = [:]
-        for freq in allFrequencies where freq.store?.id == store.id {
-            if let itemID = freq.item?.id {
-                freqMap[itemID, default: 0] += freq.count
-            }
+        var freqMap: [String: Int] = [:]
+        for freq in dataStore.frequencies where freq.storeID == store.id {
+            freqMap[freq.itemID, default: 0] += freq.count
         }
 
-        return store.items
+        return dataStore.items(for: store)
             .filter { !existingIDs.contains($0.id) }
             .sorted { a, b in
                 let freqA = freqMap[a.id, default: 0]
@@ -83,7 +78,7 @@ struct AddFromStoreView: View {
         }
     }
 
-    private func toggleItem(_ item: Item) {
+    private func toggleItem(_ item: ItemModel) {
         if selectedItemIDs.contains(item.id) {
             selectedItemIDs.remove(item.id)
         } else {
@@ -94,42 +89,23 @@ struct AddFromStoreView: View {
     private func save() {
         let selected = candidateItems.filter { selectedItemIDs.contains($0.id) }
         for item in selected {
-            let entry = ShoppingListEntry(item: item)
-            modelContext.insert(entry)
-            shoppingList.entries.append(entry)
-            incrementFrequency(for: item, at: store)
+            let entry = ShoppingListEntryModel(
+                listID: shoppingList.id,
+                itemID: item.id,
+                itemName: item.name,
+                itemNotes: item.notes
+            )
+            dataStore.addEntry(entry)
+            dataStore.incrementFrequency(storeID: store.id, itemID: item.id)
         }
         dismiss()
-    }
-
-    private func incrementFrequency(for item: Item, at store: Store) {
-        if let existing = allFrequencies.first(where: {
-            $0.store?.id == store.id && $0.item?.id == item.id
-        }) {
-            existing.count += 1
-        } else {
-            modelContext.insert(StoreItemFrequency(store: store, item: item))
-        }
     }
 }
 
 #Preview {
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(
-        for: Store.self, Item.self, ShoppingList.self, ShoppingListEntry.self, StoreItemFrequency.self,
-        configurations: config
-    )
-    let ctx = container.mainContext
-    let store = Store(name: "Whole Foods")
-    let item1 = Item(name: "Organic Milk")
-    let item2 = Item(name: "Sourdough Bread")
-    ctx.insert(store)
-    ctx.insert(item1)
-    ctx.insert(item2)
-    store.items = [item1, item2]
-    let list = ShoppingList(store: store)
-    ctx.insert(list)
-
-    return AddFromStoreView(shoppingList: list, store: store)
-        .modelContainer(container)
+    let store = AppDataStore.preview
+    let list = ShoppingListModel(id: "l1", storeID: "s1", storeName: "Whole Foods")
+    store.shoppingLists = [list]
+    return AddFromStoreView(shoppingList: list, store: StoreModel(id: "s1", name: "Whole Foods", itemIDs: ["i1"]))
+        .environment(store)
 }

@@ -1,12 +1,14 @@
 import SwiftUI
-import SwiftData
 
 struct StoresTab: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Store.name) private var stores: [Store]
+    @Environment(AppDataStore.self) private var dataStore
 
     @State private var showAddStore = false
-    @State private var storeToEdit: Store?
+    @State private var storeToEdit: StoreModel?
+
+    private var stores: [StoreModel] {
+        dataStore.stores.sorted { $0.name < $1.name }
+    }
 
     var body: some View {
         NavigationStack {
@@ -50,13 +52,14 @@ struct StoresTab: View {
 
     private func deleteStores(at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(stores[index])
+            dataStore.deleteStore(id: stores[index].id)
         }
     }
 }
 
 private struct StoreRow: View {
-    let store: Store
+    let store: StoreModel
+    @Environment(AppDataStore.self) private var dataStore
 
     var body: some View {
         HStack(spacing: 12) {
@@ -70,7 +73,8 @@ private struct StoreRow: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                Text("\(store.items.count) item\(store.items.count == 1 ? "" : "s")")
+                let count = dataStore.items(for: store).count
+                Text("\(count) item\(count == 1 ? "" : "s")")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
@@ -83,5 +87,5 @@ private struct StoreRow: View {
 
 #Preview {
     StoresTab()
-        .modelContainer(for: [Store.self, Item.self], inMemory: true)
+        .environment(AppDataStore.preview)
 }

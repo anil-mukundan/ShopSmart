@@ -1,25 +1,27 @@
 import SwiftUI
-import SwiftData
 
 struct CreateItemView: View {
-    @Environment(\.modelContext) private var modelContext
+    @Environment(AppDataStore.self) private var dataStore
     @Environment(\.dismiss) private var dismiss
-    @Query(sort: \Store.name) private var allStores: [Store]
-    @Query(sort: \Item.name) private var allItems: [Item]
 
-    /// Display name of the store this item is being created from.
     let currentStoreName: String
-    /// Persistent ID of the store when editing an existing one; nil when the store is new.
-    let currentStoreID: PersistentIdentifier?
-    /// Called with the newly created item so the caller can react (e.g. auto-select it).
-    let onItemCreated: (Item) -> Void
+    let currentStoreID: String?
+    let onItemCreated: (ItemModel) -> Void
 
     @State private var name = ""
     @State private var notes = ""
-    @State private var selectedStoreIDs: Set<PersistentIdentifier> = []
-    @State private var duplicateItem: Item? = nil
+    @State private var selectedStoreIDs: Set<String> = []
+    @State private var duplicateItem: ItemModel? = nil
     @State private var showDuplicateAlert = false
     @State private var pendingName: String = ""
+
+    private var allStores: [StoreModel] {
+        dataStore.stores.sorted { $0.name < $1.name }
+    }
+
+    private var allItems: [ItemModel] {
+        dataStore.items.sorted { $0.name < $1.name }
+    }
 
     var body: some View {
         NavigationStack {
@@ -37,7 +39,7 @@ struct CreateItemView: View {
                             .foregroundStyle(.secondary)
                             .font(.callout)
                     } else {
-                        ForEach(allStores, id: \.id) { (store: Store) in
+                        ForEach(allStores, id: \.id) { store in
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(store.name)
@@ -101,7 +103,7 @@ struct CreateItemView: View {
         }
     }
 
-    private func toggleStore(_ store: Store) {
+    private func toggleStore(_ store: StoreModel) {
         guard store.id != currentStoreID else { return }
         if selectedStoreIDs.contains(store.id) {
             selectedStoreIDs.remove(store.id)
@@ -128,12 +130,20 @@ struct CreateItemView: View {
         let trimmedName = pendingName.isEmpty ? name.trimmingCharacters(in: .whitespaces).capitalized : pendingName
         let finalNotes = notes.trimmingCharacters(in: .whitespaces)
 
-        let newItem = Item(
+        let newItem = ItemModel(
             name: trimmedName,
             notes: finalNotes.isEmpty ? nil : finalNotes
         )
-        newItem.stores = allStores.filter { selectedStoreIDs.contains($0.id) }
-        modelContext.insert(newItem)
+        dataStore.addItem(newItem)
+
+        for storeID in selectedStoreIDs {
+            if var s = dataStore.stores.first(where: { $0.id == storeID }) {
+                if !s.itemIDs.contains(newItem.id) {
+                    s.itemIDs.append(newItem.id)
+                    dataStore.updateStore(s)
+                }
+            }
+        }
 
         onItemCreated(newItem)
         dismiss()
@@ -142,5 +152,5 @@ struct CreateItemView: View {
 
 #Preview {
     CreateItemView(currentStoreName: "Whole Foods", currentStoreID: nil) { _ in }
-        .modelContainer(for: [Store.self, Item.self], inMemory: true)
+        .environment(AppDataStore.preview)
 }

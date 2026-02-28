@@ -1,36 +1,34 @@
 import SwiftUI
-import SwiftData
 
 struct ShopTab: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Store.name) private var stores: [Store]
-    @Query private var allFrequencies: [StoreItemFrequency]
-    @Query private var allShoppingLists: [ShoppingList]
+    @Environment(AppDataStore.self) private var dataStore
 
     @Binding var selectedTab: Int
-    @State private var selectedStoreID: PersistentIdentifier?
-    @State private var itemCounts: [PersistentIdentifier: Int] = [:]
+    @State private var selectedStoreID: String?
+    @State private var itemCounts: [String: Int] = [:]
 
-    private var selectedStore: Store? {
+    private var stores: [StoreModel] {
+        dataStore.stores.sorted { $0.name < $1.name }
+    }
+
+    private var selectedStore: StoreModel? {
         stores.first { $0.id == selectedStoreID }
     }
 
-    private var existingListForSelectedStore: ShoppingList? {
-        guard let store = selectedStore else { return nil }
-        return allShoppingLists.first { $0.store?.id == store.id }
+    private var existingListForSelectedStore: ShoppingListModel? {
+        guard let storeID = selectedStoreID else { return nil }
+        return dataStore.shoppingLists.first { $0.storeID == storeID }
     }
 
-    private var availableItems: [Item] {
+    private var availableItems: [ItemModel] {
         guard let store = selectedStore else { return [] }
 
-        var freqMap: [PersistentIdentifier: Int] = [:]
-        for freq in allFrequencies where freq.store?.id == store.id {
-            if let itemID = freq.item?.id {
-                freqMap[itemID, default: 0] += freq.count
-            }
+        var freqMap: [String: Int] = [:]
+        for freq in dataStore.frequencies where freq.storeID == store.id {
+            freqMap[freq.itemID, default: 0] += freq.count
         }
 
-        return store.items.sorted { a, b in
+        return dataStore.items(for: store).sorted { a, b in
             let freqA = freqMap[a.id, default: 0]
             let freqB = freqMap[b.id, default: 0]
             if freqA != freqB { return freqA > freqB }
@@ -47,18 +45,17 @@ struct ShopTab: View {
                             .foregroundStyle(.secondary)
                     } else {
                         Picker("Select Store", selection: $selectedStoreID) {
-                            Text("Choose a store…").tag(Optional<PersistentIdentifier>(nil))
+                            Text("Choose a store…").tag(Optional<String>(nil))
                             ForEach(stores) { store in
                                 Text(store.name).tag(Optional(store.id))
                             }
                         }
                         .onChange(of: selectedStoreID) {
                             if let existingList = existingListForSelectedStore {
-                                var counts: [PersistentIdentifier: Int] = [:]
-                                for entry in existingList.entries where !entry.isInCart {
-                                    if let itemID = entry.item?.id {
-                                        counts[itemID] = entry.count
-                                    }
+                                let existingEntries = dataStore.entries(forListID: existingList.id)
+                                var counts: [String: Int] = [:]
+                                for entry in existingEntries where !entry.isInCart {
+                                    counts[entry.itemID] = entry.count
                                 }
                                 itemCounts = counts
                             } else {
@@ -114,7 +111,7 @@ struct ShopTab: View {
         }
     }
 
-    private func toggleItem(_ item: Item) {
+    private func toggleItem(_ item: ItemModel) {
         if itemCounts[item.id] != nil {
             itemCounts.removeValue(forKey: item.id)
         } else {
@@ -122,11 +119,11 @@ struct ShopTab: View {
         }
     }
 
-    private func incrementCount(for item: Item) {
+    private func incrementCount(for item: ItemModel) {
         itemCounts[item.id, default: 1] += 1
     }
 
-    private func decrementCount(for item: Item) {
+    private func decrementCount(for item: ItemModel) {
         guard let current = itemCounts[item.id] else { return }
         if current <= 1 {
             itemCounts.removeValue(forKey: item.id)
@@ -141,41 +138,48 @@ struct ShopTab: View {
         guard !itemsToSave.isEmpty else { return }
 
         if let existingList = existingListForSelectedStore {
-            // Track which items were already in the list before this update
-            let existingItemIDs = Set(existingList.entries.compactMap { $0.item?.id })
-            let checkedItemIDs = Set(existingList.entries.filter(\.isInCart).compactMap { $0.item?.id })
+            let existingEntries = dataStore.entries(forListID: existingList.id)
+            let existingItemIDs = Set(existingEntries.map(\.itemID))
+            let checkedItemIDs = Set(existingEntries.filter(\.isInCart).map(\.itemID))
 
-            // Remove all unchecked entries — they'll be replaced by the new selection
-            let uncheckedEntries = existingList.entries.filter { !$0.isInCart }
-            for entry in uncheckedEntries {
-                modelContext.delete(entry)
+            // Remove unchecked entries
+            for entry in existingEntries where !entry.isInCart {
+                dataStore.deleteEntry(id: entry.id)
             }
-            existingList.entries.removeAll { !$0.isInCart }
 
-            // Add new entries for each selected item (skip ones already checked off)
+            // Add new entries (skip already-checked items)
             for item in itemsToSave {
                 guard !checkedItemIDs.contains(item.id) else { continue }
-                let entry = ShoppingListEntry(item: item)
-                entry.count = itemCounts[item.id] ?? 1
-                modelContext.insert(entry)
-                existingList.entries.append(entry)
+                let entry = ShoppingListEntryModel(
+                    listID: existingList.id,
+                    itemID: item.id,
+                    itemName: item.name,
+                    itemNotes: item.notes,
+                    count: itemCounts[item.id] ?? 1
+                )
+                dataStore.addEntry(entry)
 
-                // Only increment frequency for items that weren't in the list before
                 if !existingItemIDs.contains(item.id) {
-                    incrementFrequency(for: item, at: store)
+                    dataStore.incrementFrequency(storeID: store.id, itemID: item.id)
                 }
             }
 
-            existingList.date = .now
+            var updatedList = existingList
+            updatedList.date = .now
+            dataStore.updateShoppingList(updatedList)
         } else {
-            let list = ShoppingList(store: store)
-            modelContext.insert(list)
+            let list = ShoppingListModel(storeID: store.id, storeName: store.name)
+            dataStore.addShoppingList(list)
             for item in itemsToSave {
-                let entry = ShoppingListEntry(item: item)
-                entry.count = itemCounts[item.id] ?? 1
-                modelContext.insert(entry)
-                list.entries.append(entry)
-                incrementFrequency(for: item, at: store)
+                let entry = ShoppingListEntryModel(
+                    listID: list.id,
+                    itemID: item.id,
+                    itemName: item.name,
+                    itemNotes: item.notes,
+                    count: itemCounts[item.id] ?? 1
+                )
+                dataStore.addEntry(entry)
+                dataStore.incrementFrequency(storeID: store.id, itemID: item.id)
             }
         }
 
@@ -183,22 +187,12 @@ struct ShopTab: View {
         itemCounts = [:]
         selectedTab = 1
     }
-
-    private func incrementFrequency(for item: Item, at store: Store) {
-        if let existing = allFrequencies.first(where: {
-            $0.store?.id == store.id && $0.item?.id == item.id
-        }) {
-            existing.count += 1
-        } else {
-            modelContext.insert(StoreItemFrequency(store: store, item: item))
-        }
-    }
 }
 
 // MARK: - Item Selection Row
 
 private struct ItemSelectionRow: View {
-    let item: Item
+    let item: ItemModel
     let count: Int?
     let onTap: () -> Void
     let onIncrement: () -> Void
@@ -246,8 +240,5 @@ private struct ItemSelectionRow: View {
 
 #Preview {
     ShopTab(selectedTab: .constant(0))
-        .modelContainer(
-            for: [Store.self, Item.self, ShoppingList.self, ShoppingListEntry.self],
-            inMemory: true
-        )
+        .environment(AppDataStore.preview)
 }

@@ -39,7 +39,7 @@ private func faviconURL(for websiteURL: String) -> URL? {
 /// Shows a store's favicon with a spinner while loading.
 /// Falls back to a generic storefront badge if no URL is set or the fetch fails.
 struct StoreLogo: View {
-    let store: Store
+    let store: StoreModel
     var size: CGFloat = 34
 
     @State private var logo: UIImage? = nil

@@ -1,22 +1,27 @@
 import SwiftUI
-import SwiftData
 
 struct ItemFormView: View {
-    @Environment(\.modelContext) private var modelContext
+    @Environment(AppDataStore.self) private var dataStore
     @Environment(\.dismiss) private var dismiss
-    @Query(sort: \Store.name) private var allStores: [Store]
-    @Query(sort: \Item.name) private var allItems: [Item]
 
-    var item: Item?
+    var item: ItemModel?
 
     @State private var name = ""
     @State private var notes = ""
-    @State private var selectedStoreIDs: Set<PersistentIdentifier> = []
-    @State private var duplicateItem: Item? = nil
+    @State private var selectedStoreIDs: Set<String> = []
+    @State private var duplicateItem: ItemModel? = nil
     @State private var showDuplicateAlert = false
     @State private var pendingName: String = ""
 
     private var isEditing: Bool { item != nil }
+
+    private var allStores: [StoreModel] {
+        dataStore.stores.sorted { $0.name < $1.name }
+    }
+
+    private var allItems: [ItemModel] {
+        dataStore.items.sorted { $0.name < $1.name }
+    }
 
     var body: some View {
         NavigationStack {
@@ -34,7 +39,7 @@ struct ItemFormView: View {
                             .foregroundStyle(.secondary)
                             .font(.callout)
                     } else {
-                        ForEach(allStores, id: \.id) { (store: Store) in
+                        ForEach(allStores, id: \.id) { store in
                             HStack {
                                 Text(store.name)
                                 Spacer()
@@ -83,12 +88,12 @@ struct ItemFormView: View {
             if let item {
                 name = item.name
                 notes = item.notes ?? ""
-                selectedStoreIDs = Set(item.stores.map(\.id))
+                selectedStoreIDs = Set(dataStore.stores(for: item).map(\.id))
             }
         }
     }
 
-    private func toggleStore(_ store: Store) {
+    private func toggleStore(_ store: StoreModel) {
         if selectedStoreIDs.contains(store.id) {
             selectedStoreIDs.remove(store.id)
         } else {
@@ -114,16 +119,40 @@ struct ItemFormView: View {
         let trimmedName = pendingName.isEmpty ? name.trimmingCharacters(in: .whitespaces).capitalized : pendingName
         let notesValue = notes.trimmingCharacters(in: .whitespaces)
         let finalNotes = notesValue.isEmpty ? nil : notesValue
-        let selectedStores = allStores.filter { selectedStoreIDs.contains($0.id) }
 
-        if let item {
-            item.name = trimmedName
-            item.notes = finalNotes
-            item.stores = selectedStores
+        if var existingItem = item {
+            existingItem.name = trimmedName
+            existingItem.notes = finalNotes
+            dataStore.updateItem(existingItem)
+
+            // Remove from deselected stores
+            for store in dataStore.stores(for: existingItem) {
+                if !selectedStoreIDs.contains(store.id) {
+                    var s = store
+                    s.itemIDs.removeAll { $0 == existingItem.id }
+                    dataStore.updateStore(s)
+                }
+            }
+            // Add to newly selected stores
+            for storeID in selectedStoreIDs {
+                if var s = dataStore.stores.first(where: { $0.id == storeID }) {
+                    if !s.itemIDs.contains(existingItem.id) {
+                        s.itemIDs.append(existingItem.id)
+                        dataStore.updateStore(s)
+                    }
+                }
+            }
         } else {
-            let newItem = Item(name: trimmedName, notes: finalNotes)
-            newItem.stores = selectedStores
-            modelContext.insert(newItem)
+            let newItem = ItemModel(name: trimmedName, notes: finalNotes)
+            dataStore.addItem(newItem)
+            for storeID in selectedStoreIDs {
+                if var s = dataStore.stores.first(where: { $0.id == storeID }) {
+                    if !s.itemIDs.contains(newItem.id) {
+                        s.itemIDs.append(newItem.id)
+                        dataStore.updateStore(s)
+                    }
+                }
+            }
         }
         dismiss()
     }
@@ -131,5 +160,5 @@ struct ItemFormView: View {
 
 #Preview {
     ItemFormView()
-        .modelContainer(for: [Item.self, Store.self], inMemory: true)
+        .environment(AppDataStore.preview)
 }

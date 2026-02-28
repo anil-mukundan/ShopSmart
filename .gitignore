@@ -36,5 +36,8 @@ fastlane/test_output
 .LSOverride
 *.icloud
 
+# Firebase
+GoogleService-Info.plist
+
 # Claude Code
 .claude/

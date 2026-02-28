@@ -1,9 +1,11 @@
 import SwiftUI
-import SwiftData
 
 struct ListsTab: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query(sort: \ShoppingList.date, order: .reverse) private var lists: [ShoppingList]
+    @Environment(AppDataStore.self) private var dataStore
+
+    private var lists: [ShoppingListModel] {
+        dataStore.shoppingLists.sorted { $0.date > $1.date }
+    }
 
     var body: some View {
         NavigationStack {
@@ -40,16 +42,18 @@ struct ListsTab: View {
 
     private func deleteLists(at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(lists[index])
+            dataStore.deleteShoppingList(id: lists[index].id)
         }
     }
 }
 
 private struct ShoppingListRow: View {
-    let list: ShoppingList
+    let list: ShoppingListModel
+    @Environment(AppDataStore.self) private var dataStore
 
-    private var cartCount: Int { list.entries.filter(\.isInCart).count }
-    private var total: Int { list.entries.count }
+    private var listEntries: [ShoppingListEntryModel] { dataStore.entries(forListID: list.id) }
+    private var cartCount: Int { listEntries.filter(\.isInCart).count }
+    private var total: Int { listEntries.count }
     private var allDone: Bool { total > 0 && cartCount == total }
 
     var body: some View {
@@ -84,8 +88,5 @@ private struct ShoppingListRow: View {
 
 #Preview {
     ListsTab()
-        .modelContainer(
-            for: [Store.self, Item.self, ShoppingList.self, ShoppingListEntry.self],
-            inMemory: true
-        )
+        .environment(AppDataStore.preview)
 }

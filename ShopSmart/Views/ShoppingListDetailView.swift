@@ -1,13 +1,10 @@
 import SwiftUI
-import SwiftData
 
 struct ShoppingListDetailView: View {
-    @Environment(\.modelContext) private var modelContext
+    @Environment(AppDataStore.self) private var dataStore
     @Environment(\.dismiss) private var dismiss
 
-    let shoppingList: ShoppingList
-
-    @Query private var allFrequencies: [StoreItemFrequency]
+    let shoppingList: ShoppingListModel
 
     @State private var showDeleteConfirmation = false
     @State private var showIncompleteDeleteWarning = false
@@ -15,24 +12,20 @@ struct ShoppingListDetailView: View {
     @State private var showAddFromStore = false
     @State private var editMode: EditMode = .inactive
 
-    private var sortedEntries: [ShoppingListEntry] {
-        guard let storeID = shoppingList.store?.id else {
-            return shoppingList.entries.sorted { ($0.item?.name ?? "") < ($1.item?.name ?? "") }
-        }
-        var orderMap: [PersistentIdentifier: Int] = [:]
-        for freq in allFrequencies where freq.store?.id == storeID {
-            if let itemID = freq.item?.id { orderMap[itemID] = freq.sortOrder }
-        }
-        return shoppingList.entries.sorted { a, b in
-            let oa = a.item.flatMap { orderMap[$0.id] } ?? Int.max
-            let ob = b.item.flatMap { orderMap[$0.id] } ?? Int.max
-            if oa != ob { return oa < ob }
-            return (a.item?.name ?? "") < (b.item?.name ?? "")
-        }
+    private var store: StoreModel? {
+        dataStore.stores.first { $0.id == shoppingList.storeID }
     }
 
-    private var cartCount: Int { shoppingList.entries.filter(\.isInCart).count }
-    private var total: Int { shoppingList.entries.count }
+    private var sortedEntries: [ShoppingListEntryModel] {
+        dataStore.sortedEntries(for: shoppingList)
+    }
+
+    private var allEntries: [ShoppingListEntryModel] {
+        dataStore.entries(forListID: shoppingList.id)
+    }
+
+    private var cartCount: Int { allEntries.filter(\.isInCart).count }
+    private var total: Int { allEntries.count }
     private var allDone: Bool { total > 0 && cartCount == total }
 
     var body: some View {
@@ -41,7 +34,7 @@ struct ShoppingListDetailView: View {
                 Section {
                     ForEach(sortedEntries) { entry in
                         EntryRow(entry: entry)
-                            }
+                    }
                     .onMove(perform: moveEntries)
                 } header: {
                     HStack(spacing: 6) {
@@ -61,7 +54,7 @@ struct ShoppingListDetailView: View {
         .navigationTitle(shoppingList.storeName)
         .navigationBarTitleDisplayMode(.large)
         .overlay {
-            if shoppingList.entries.isEmpty {
+            if allEntries.isEmpty {
                 ContentUnavailableView(
                     "Empty List",
                     systemImage: "cart",
@@ -70,12 +63,12 @@ struct ShoppingListDetailView: View {
             }
         }
         .sheet(isPresented: $showAddItem) {
-            if let store = shoppingList.store {
+            if let store {
                 AddItemToListView(shoppingList: shoppingList, currentStore: store)
             }
         }
         .sheet(isPresented: $showAddFromStore) {
-            if let store = shoppingList.store {
+            if let store {
                 AddFromStoreView(shoppingList: shoppingList, store: store)
             }
         }
@@ -85,7 +78,7 @@ struct ShoppingListDetailView: View {
                     Text(allDone ? "Done!" : "\(cartCount)/\(total)")
                         .font(.subheadline.weight(allDone ? .semibold : .regular))
                         .foregroundStyle(allDone ? .green : .secondary)
-                    if total >= 2 && shoppingList.store != nil {
+                    if total >= 2 && store != nil {
                         Button {
                             withAnimation { editMode = editMode == .active ? .inactive : .active }
                         } label: {
@@ -94,7 +87,7 @@ struct ShoppingListDetailView: View {
                         }
                     }
                     if editMode == .inactive {
-                        if shoppingList.store != nil {
+                        if store != nil {
                             Menu {
                                 Button { showAddFromStore = true } label: {
                                     Label("Add from Store Catalog", systemImage: "cart.badge.plus")
@@ -144,39 +137,30 @@ struct ShoppingListDetailView: View {
     }
 
     private func moveEntries(from source: IndexSet, to destination: Int) {
-        guard let store = shoppingList.store else { return }
         var reordered = sortedEntries
         reordered.move(fromOffsets: source, toOffset: destination)
         for (index, entry) in reordered.enumerated() {
-            guard let item = entry.item else { continue }
-            if let freq = allFrequencies.first(where: {
-                $0.store?.id == store.id && $0.item?.id == item.id
-            }) {
-                freq.sortOrder = index
-            } else {
-                let freq = StoreItemFrequency(store: store, item: item, count: 0, sortOrder: index)
-                modelContext.insert(freq)
-            }
+            dataStore.updateSortOrder(storeID: shoppingList.storeID, itemID: entry.itemID, sortOrder: index)
         }
     }
 
     private func deleteList() {
-        modelContext.delete(shoppingList)
+        dataStore.deleteShoppingList(id: shoppingList.id)
         dismiss()
     }
 
     private func removeCheckedItems() {
-        let checkedEntries = shoppingList.entries.filter(\.isInCart)
-        for entry in checkedEntries {
-            modelContext.delete(entry)
-        }
+        dataStore.entries(forListID: shoppingList.id)
+            .filter(\.isInCart)
+            .forEach { dataStore.deleteEntry(id: $0.id) }
     }
 }
 
 // MARK: - Entry Row
 
 private struct EntryRow: View {
-    @Bindable var entry: ShoppingListEntry
+    let entry: ShoppingListEntryModel
+    @Environment(AppDataStore.self) private var dataStore
     @Environment(\.editMode) private var editMode
 
     var body: some View {
@@ -199,7 +183,7 @@ private struct EntryRow: View {
                             .foregroundStyle(entry.isInCart ? .quaternary : .secondary)
                     }
                 }
-                if let notes = entry.item?.notes, !notes.isEmpty {
+                if let notes = entry.itemNotes, !notes.isEmpty {
                     Text(notes)
                         .font(.caption)
                         .foregroundStyle(entry.isInCart ? .quaternary : .tertiary)
@@ -215,7 +199,7 @@ private struct EntryRow: View {
         .onTapGesture {
             guard editMode?.wrappedValue != .active else { return }
             withAnimation(.easeInOut(duration: 0.15)) {
-                entry.isInCart.toggle()
+                dataStore.toggleEntryInCart(id: entry.id)
             }
         }
     }
@@ -223,50 +207,17 @@ private struct EntryRow: View {
 
 // MARK: - Preview
 
-private struct ShoppingListDetailPreview: View {
-    private let container: ModelContainer
-    private let list: ShoppingList
-
-    init() {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try! ModelContainer(
-            for: Store.self, Item.self, ShoppingList.self, ShoppingListEntry.self,
-            configurations: config
-        )
-        let ctx = container.mainContext
-
-        let store = Store(name: "Whole Foods")
-        let item1 = Item(name: "Organic Milk", notes: "Full-fat, 1 gallon")
-        let item2 = Item(name: "Sourdough Bread")
-        let item3 = Item(name: "Fuji Apples")
-        ctx.insert(store)
-        ctx.insert(item1)
-        ctx.insert(item2)
-        ctx.insert(item3)
-
-        let list = ShoppingList(store: store)
-        ctx.insert(list)
-
-        let e1 = ShoppingListEntry(item: item1, isInCart: true)
-        let e2 = ShoppingListEntry(item: item2)
-        let e3 = ShoppingListEntry(item: item3)
-        ctx.insert(e1)
-        ctx.insert(e2)
-        ctx.insert(e3)
-        list.entries = [e1, e2, e3]
-
-        self.container = container
-        self.list = list
-    }
-
-    var body: some View {
-        NavigationStack {
-            ShoppingListDetailView(shoppingList: list)
-        }
-        .modelContainer(container)
-    }
-}
-
 #Preview {
-    ShoppingListDetailPreview()
+    let store = AppDataStore.preview
+    let list = ShoppingListModel(id: "l1", storeID: "s1", storeName: "Whole Foods")
+    store.shoppingLists = [list]
+    store.entries = [
+        ShoppingListEntryModel(id: "e1", listID: "l1", itemID: "i1", itemName: "Organic Milk", itemNotes: "Full-fat, 1 gallon", isInCart: true),
+        ShoppingListEntryModel(id: "e2", listID: "l1", itemID: "i2", itemName: "Sourdough Bread"),
+        ShoppingListEntryModel(id: "e3", listID: "l1", itemID: "i3", itemName: "Fuji Apples")
+    ]
+    return NavigationStack {
+        ShoppingListDetailView(shoppingList: list)
+    }
+    .environment(store)
 }

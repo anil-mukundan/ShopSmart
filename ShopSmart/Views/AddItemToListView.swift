@@ -1,38 +1,35 @@
 import SwiftUI
-import SwiftData
 
-/// Thin wrapper around CreateItemView that also adds the new item
-/// to the given shopping list as an entry.
 struct AddItemToListView: View {
-    @Environment(\.modelContext) private var modelContext
+    @Environment(AppDataStore.self) private var dataStore
 
-    let shoppingList: ShoppingList
-    let currentStore: Store
+    let shoppingList: ShoppingListModel
+    let currentStore: StoreModel
 
     var body: some View {
         CreateItemView(
             currentStoreName: currentStore.name,
             currentStoreID: currentStore.id
         ) { newItem in
-            let entry = ShoppingListEntry(item: newItem)
-            modelContext.insert(entry)
-            shoppingList.entries.append(entry)
+            let entry = ShoppingListEntryModel(
+                listID: shoppingList.id,
+                itemID: newItem.id,
+                itemName: newItem.name,
+                itemNotes: newItem.notes
+            )
+            dataStore.addEntry(entry)
+            dataStore.incrementFrequency(storeID: currentStore.id, itemID: newItem.id)
         }
     }
 }
 
 #Preview {
-    let config = ModelConfiguration(isStoredInMemoryOnly: true)
-    let container = try! ModelContainer(
-        for: Store.self, Item.self, ShoppingList.self, ShoppingListEntry.self,
-        configurations: config
+    let store = AppDataStore.preview
+    let list = ShoppingListModel(id: "l1", storeID: "s1", storeName: "Whole Foods")
+    store.shoppingLists = [list]
+    return AddItemToListView(
+        shoppingList: list,
+        currentStore: StoreModel(id: "s1", name: "Whole Foods", itemIDs: ["i1"])
     )
-    let ctx = container.mainContext
-    let store = Store(name: "Whole Foods")
-    ctx.insert(store)
-    let list = ShoppingList(store: store)
-    ctx.insert(list)
-
-    return AddItemToListView(shoppingList: list, currentStore: store)
-        .modelContainer(container)
+    .environment(store)
 }

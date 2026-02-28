@@ -1,15 +1,17 @@
 import SwiftUI
-import SwiftData
 
 struct ItemsTab: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Item.name) private var items: [Item]
+    @Environment(AppDataStore.self) private var dataStore
 
     @State private var showAddItem = false
-    @State private var itemToEdit: Item?
+    @State private var itemToEdit: ItemModel?
     @State private var searchText = ""
 
-    private var filteredItems: [Item] {
+    private var items: [ItemModel] {
+        dataStore.items.sorted { $0.name < $1.name }
+    }
+
+    private var filteredItems: [ItemModel] {
         guard !searchText.isEmpty else { return items }
         return items.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
@@ -59,13 +61,20 @@ struct ItemsTab: View {
 
     private func deleteItems(at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(filteredItems[index])
+            let item = filteredItems[index]
+            for store in dataStore.stores(for: item) {
+                var updatedStore = store
+                updatedStore.itemIDs.removeAll { $0 == item.id }
+                dataStore.updateStore(updatedStore)
+            }
+            dataStore.deleteItem(id: item.id)
         }
     }
 }
 
 private struct ItemRow: View {
-    let item: Item
+    let item: ItemModel
+    @Environment(AppDataStore.self) private var dataStore
 
     var body: some View {
         HStack(spacing: 12) {
@@ -79,8 +88,9 @@ private struct ItemRow: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                if !item.stores.isEmpty {
-                    Text(item.stores.map(\.name).sorted().joined(separator: " · "))
+                let storeNames = dataStore.stores(for: item).map(\.name).sorted()
+                if !storeNames.isEmpty {
+                    Text(storeNames.joined(separator: " · "))
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }
@@ -94,5 +104,5 @@ private struct ItemRow: View {
 
 #Preview {
     ItemsTab()
-        .modelContainer(for: [Item.self, Store.self], inMemory: true)
+        .environment(AppDataStore.preview)
 }
