@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @AppStorage("hasSignedInBefore") private var hasSignedInBefore = false
     @Environment(AuthManager.self) private var authManager
     @State private var selectedTab = 0
 
@@ -27,7 +28,10 @@ struct ContentView: View {
                     .tag(4)
             }
         } else {
-            AuthView()
+            AuthView(defaultToSignUp: !hasSignedInBefore)
+                .onChange(of: authManager.isSignedIn) { _, signedIn in
+                    if signedIn { hasSignedInBefore = true }
+                }
         }
     }
 }

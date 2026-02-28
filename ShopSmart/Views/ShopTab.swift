@@ -6,6 +6,8 @@ struct ShopTab: View {
     @Binding var selectedTab: Int
     @State private var selectedStoreID: String?
     @State private var itemCounts: [String: Int] = [:]
+    @State private var itemNotes: [String: String] = [:]
+    @State private var noteEditTarget: NoteEditTarget?
 
     private var stores: [StoreModel] {
         dataStore.stores.sorted { $0.name < $1.name }
@@ -54,12 +56,16 @@ struct ShopTab: View {
                             if let existingList = existingListForSelectedStore {
                                 let existingEntries = dataStore.entries(forListID: existingList.id)
                                 var counts: [String: Int] = [:]
+                                var notes: [String: String] = [:]
                                 for entry in existingEntries where !entry.isInCart {
                                     counts[entry.itemID] = entry.count
+                                    if let n = entry.notes, !n.isEmpty { notes[entry.itemID] = n }
                                 }
                                 itemCounts = counts
+                                itemNotes = notes
                             } else {
                                 itemCounts = [:]
+                                itemNotes = [:]
                             }
                         }
                     }
@@ -76,9 +82,11 @@ struct ShopTab: View {
                                 ItemSelectionRow(
                                     item: item,
                                     count: itemCounts[item.id],
+                                    note: itemNotes[item.id],
                                     onTap: { toggleItem(item) },
                                     onIncrement: { incrementCount(for: item) },
-                                    onDecrement: { decrementCount(for: item) }
+                                    onDecrement: { decrementCount(for: item) },
+                                    onNote: { noteEditTarget = NoteEditTarget(id: item.id, itemName: item.name) }
                                 )
                             }
                         }
@@ -108,6 +116,19 @@ struct ShopTab: View {
                 }
             }
             .navigationTitle("Shop")
+        }
+        .sheet(item: $noteEditTarget) { target in
+            NoteEditorSheet(
+                itemName: target.itemName,
+                note: Binding(
+                    get: { itemNotes[target.id] ?? "" },
+                    set: { newValue in
+                        let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if trimmed.isEmpty { itemNotes.removeValue(forKey: target.id) }
+                        else { itemNotes[target.id] = newValue }
+                    }
+                )
+            )
         }
     }
 
@@ -154,7 +175,8 @@ struct ShopTab: View {
                     listID: existingList.id,
                     itemID: item.id,
                     itemName: item.name,
-                    count: itemCounts[item.id] ?? 1
+                    count: itemCounts[item.id] ?? 1,
+                    notes: itemNotes[item.id]
                 )
                 dataStore.addEntry(entry)
 
@@ -174,7 +196,8 @@ struct ShopTab: View {
                     listID: list.id,
                     itemID: item.id,
                     itemName: item.name,
-                    count: itemCounts[item.id] ?? 1
+                    count: itemCounts[item.id] ?? 1,
+                    notes: itemNotes[item.id]
                 )
                 dataStore.addEntry(entry)
                 dataStore.incrementFrequency(storeID: store.id, itemID: item.id)
@@ -183,6 +206,7 @@ struct ShopTab: View {
 
         selectedStoreID = nil
         itemCounts = [:]
+        itemNotes = [:]
         selectedTab = 1
     }
 }
@@ -192,9 +216,11 @@ struct ShopTab: View {
 private struct ItemSelectionRow: View {
     let item: ItemModel
     let count: Int?
+    let note: String?
     let onTap: () -> Void
     let onIncrement: () -> Void
     let onDecrement: () -> Void
+    let onNote: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -225,6 +251,12 @@ private struct ItemSelectionRow: View {
                     }
                 }
                 .buttonStyle(.borderless)
+
+                Button { onNote() } label: {
+                    Image(systemName: note != nil ? "text.bubble.fill" : "text.bubble")
+                        .foregroundStyle(note != nil ? Color.accentColor : .secondary)
+                }
+                .buttonStyle(.borderless)
             }
             Image(systemName: count != nil ? "checkmark.circle.fill" : "circle")
                 .foregroundStyle(count != nil ? Color.accentColor : Color.secondary)
@@ -233,6 +265,43 @@ private struct ItemSelectionRow: View {
         }
         .contentShape(Rectangle())
         .onTapGesture { onTap() }
+    }
+}
+
+// MARK: - Note Edit Target
+
+private struct NoteEditTarget: Identifiable {
+    let id: String      // itemID
+    let itemName: String
+}
+
+// MARK: - Note Editor Sheet
+
+private struct NoteEditorSheet: View {
+    let itemName: String
+    @Binding var note: String
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            TextEditor(text: $note)
+                .padding(.horizontal)
+                .navigationTitle(itemName)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Clear", role: .destructive) {
+                            note = ""
+                            dismiss()
+                        }
+                        .disabled(note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { dismiss() }
+                    }
+                }
+        }
+        .presentationDetents([.medium])
     }
 }
 

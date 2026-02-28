@@ -28,6 +28,7 @@ struct ShoppingListEntryModel: Identifiable, Codable {
     var itemName: String
     var isInCart: Bool = false
     var count: Int = 1
+    var notes: String?
 }
 
 struct FrequencyModel: Identifiable, Codable {

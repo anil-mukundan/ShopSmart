@@ -166,8 +166,13 @@ private struct EntryRow: View {
     @State private var showDetail = false
 
     private var itemHasDetails: Bool {
+        if let notes = entry.notes, !notes.isEmpty { return true }
         guard let item = dataStore.items.first(where: { $0.id == entry.itemID }) else { return false }
         return item.imageData != nil || (item.brand?.isEmpty == false)
+    }
+
+    private var entryHasNote: Bool {
+        entry.notes?.isEmpty == false
     }
 
     var body: some View {
@@ -198,8 +203,8 @@ private struct EntryRow: View {
                 Button {
                     showDetail = true
                 } label: {
-                    Image(systemName: "info.circle")
-                        .foregroundStyle(.secondary)
+                    Image(systemName: entryHasNote ? "info.circle.fill" : "info.circle")
+                        .foregroundStyle(entryHasNote ? Color.accentColor : .secondary)
                 }
                 .buttonStyle(.plain)
             }
@@ -215,7 +220,7 @@ private struct EntryRow: View {
         }
         .sheet(isPresented: $showDetail) {
             if let item = dataStore.items.first(where: { $0.id == entry.itemID }) {
-                ItemDetailSheet(item: item)
+                ItemDetailSheet(item: item, note: entry.notes)
             }
         }
     }
@@ -225,6 +230,7 @@ private struct EntryRow: View {
 
 private struct ItemDetailSheet: View {
     let item: ItemModel
+    let note: String?
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -241,6 +247,19 @@ private struct ItemDetailSheet: View {
                     if let brand = item.brand, !brand.isEmpty {
                         LabeledContent("Brand", value: brand)
                             .padding(.horizontal, 4)
+                    }
+                    if let note, !note.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Label("Shopper Note", systemImage: "text.bubble.fill")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            Text(note)
+                                .padding(12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color(.secondarySystemBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+                        .padding(.horizontal, 4)
                     }
                 }
                 .padding()

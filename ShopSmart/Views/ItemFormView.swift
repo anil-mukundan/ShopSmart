@@ -9,6 +9,7 @@ struct ItemFormView: View {
 
     @State private var name = ""
     @State private var brand = ""
+    @FocusState private var nameIsFocused: Bool
     @State private var selectedStoreIDs: Set<String> = []
     @State private var duplicateItem: ItemModel? = nil
     @State private var showDuplicateAlert = false
@@ -31,6 +32,7 @@ struct ItemFormView: View {
             Form {
                 Section {
                     TextField("e.g. Organic Milk", text: $name)
+                        .focused($nameIsFocused)
                 } header: {
                     HStack(spacing: 2) {
                         Text("Item Name")
@@ -132,6 +134,8 @@ struct ItemFormView: View {
                 if let data = item.imageData {
                     itemImage = UIImage(data: data)
                 }
+            } else {
+                nameIsFocused = true
             }
         }
     }

@@ -5,9 +5,14 @@ struct AuthView: View {
 
     @State private var email = ""
     @State private var password = ""
-    @State private var isSignUp = false
+    @State private var isSignUp: Bool
+
+    init(defaultToSignUp: Bool = false) {
+        _isSignUp = State(initialValue: defaultToSignUp)
+    }
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var isPasswordVisible = false
 
     var body: some View {
         NavigationStack {
@@ -17,7 +22,24 @@ struct AuthView: View {
                         .keyboardType(.emailAddress)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
-                    SecureField("Password", text: $password)
+                    HStack {
+                        Group {
+                            if isPasswordVisible {
+                                TextField("Password", text: $password)
+                            } else {
+                                SecureField("Password", text: $password)
+                            }
+                        }
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        Button {
+                            isPasswordVisible.toggle()
+                        } label: {
+                            Image(systemName: isPasswordVisible ? "eye.slash" : "eye")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 } header: {
                     Text(isSignUp ? "Create Account" : "Sign In")
                         .font(.title2.weight(.semibold))
