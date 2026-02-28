@@ -68,11 +68,6 @@ private struct StoreRow: View {
                 Text(store.name)
                     .font(.headline)
                     .foregroundStyle(.primary)
-                if let notes = store.notes, !notes.isEmpty {
-                    Text(notes)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
                 let count = dataStore.items(for: store).count
                 Text("\(count) item\(count == 1 ? "" : "s")")
                     .font(.caption2)

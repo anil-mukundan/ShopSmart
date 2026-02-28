@@ -154,7 +154,6 @@ struct ShopTab: View {
                     listID: existingList.id,
                     itemID: item.id,
                     itemName: item.name,
-                    itemNotes: item.notes,
                     count: itemCounts[item.id] ?? 1
                 )
                 dataStore.addEntry(entry)
@@ -175,7 +174,6 @@ struct ShopTab: View {
                     listID: list.id,
                     itemID: item.id,
                     itemName: item.name,
-                    itemNotes: item.notes,
                     count: itemCounts[item.id] ?? 1
                 )
                 dataStore.addEntry(entry)
@@ -203,8 +201,8 @@ private struct ItemSelectionRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.name)
                     .foregroundStyle(.primary)
-                if let notes = item.notes, !notes.isEmpty {
-                    Text(notes)
+                if let brand = item.brand, !brand.isEmpty {
+                    Text(brand)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

@@ -44,8 +44,8 @@ struct AddFromStoreView: View {
                                     Text(item.name)
                                         .font(.headline)
                                         .foregroundStyle(.primary)
-                                    if let notes = item.notes, !notes.isEmpty {
-                                        Text(notes)
+                                    if let brand = item.brand, !brand.isEmpty {
+                                        Text(brand)
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                     }
@@ -92,8 +92,7 @@ struct AddFromStoreView: View {
             let entry = ShoppingListEntryModel(
                 listID: shoppingList.id,
                 itemID: item.id,
-                itemName: item.name,
-                itemNotes: item.notes
+                itemName: item.name
             )
             dataStore.addEntry(entry)
             dataStore.incrementFrequency(storeID: store.id, itemID: item.id)

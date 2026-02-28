@@ -163,6 +163,13 @@ private struct EntryRow: View {
     @Environment(AppDataStore.self) private var dataStore
     @Environment(\.editMode) private var editMode
 
+    @State private var showDetail = false
+
+    private var itemHasDetails: Bool {
+        guard let item = dataStore.items.first(where: { $0.id == entry.itemID }) else { return false }
+        return item.imageData != nil || (item.brand?.isEmpty == false)
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: entry.isInCart ? "checkmark.circle.fill" : "circle")
@@ -183,15 +190,19 @@ private struct EntryRow: View {
                             .foregroundStyle(entry.isInCart ? .quaternary : .secondary)
                     }
                 }
-                if let notes = entry.itemNotes, !notes.isEmpty {
-                    Text(notes)
-                        .font(.caption)
-                        .foregroundStyle(entry.isInCart ? .quaternary : .tertiary)
-                        .strikethrough(entry.isInCart, color: .secondary.opacity(0.5))
-                }
             }
 
             Spacer()
+
+            if editMode?.wrappedValue != .active && itemHasDetails {
+                Button {
+                    showDetail = true
+                } label: {
+                    Image(systemName: "info.circle")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
@@ -200,6 +211,46 @@ private struct EntryRow: View {
             guard editMode?.wrappedValue != .active else { return }
             withAnimation(.easeInOut(duration: 0.15)) {
                 dataStore.toggleEntryInCart(id: entry.id)
+            }
+        }
+        .sheet(isPresented: $showDetail) {
+            if let item = dataStore.items.first(where: { $0.id == entry.itemID }) {
+                ItemDetailSheet(item: item)
+            }
+        }
+    }
+}
+
+// MARK: - Item Detail Sheet
+
+private struct ItemDetailSheet: View {
+    let item: ItemModel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    if let data = item.imageData, let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    if let brand = item.brand, !brand.isEmpty {
+                        LabeledContent("Brand", value: brand)
+                            .padding(.horizontal, 4)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle(item.name)
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
             }
         }
     }
@@ -212,7 +263,7 @@ private struct EntryRow: View {
     let list = ShoppingListModel(id: "l1", storeID: "s1", storeName: "Whole Foods")
     store.shoppingLists = [list]
     store.entries = [
-        ShoppingListEntryModel(id: "e1", listID: "l1", itemID: "i1", itemName: "Organic Milk", itemNotes: "Full-fat, 1 gallon", isInCart: true),
+        ShoppingListEntryModel(id: "e1", listID: "l1", itemID: "i1", itemName: "Organic Milk", isInCart: true),
         ShoppingListEntryModel(id: "e2", listID: "l1", itemID: "i2", itemName: "Sourdough Bread"),
         ShoppingListEntryModel(id: "e3", listID: "l1", itemID: "i3", itemName: "Fuji Apples")
     ]

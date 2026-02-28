@@ -3,7 +3,6 @@ import Foundation
 struct StoreModel: Identifiable, Codable, Hashable {
     var id: String = UUID().uuidString
     var name: String
-    var notes: String?
     var websiteURL: String?
     var itemIDs: [String] = []
 }
@@ -11,7 +10,8 @@ struct StoreModel: Identifiable, Codable, Hashable {
 struct ItemModel: Identifiable, Codable, Hashable {
     var id: String = UUID().uuidString
     var name: String
-    var notes: String?
+    var brand: String?
+    var imageData: Data?
 }
 
 struct ShoppingListModel: Identifiable, Codable {
@@ -26,7 +26,6 @@ struct ShoppingListEntryModel: Identifiable, Codable {
     var listID: String
     var itemID: String
     var itemName: String
-    var itemNotes: String?
     var isInCart: Bool = false
     var count: Int = 1
 }

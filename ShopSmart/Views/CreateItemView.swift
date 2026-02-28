@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct CreateItemView: View {
     @Environment(AppDataStore.self) private var dataStore
@@ -9,11 +10,13 @@ struct CreateItemView: View {
     let onItemCreated: (ItemModel) -> Void
 
     @State private var name = ""
-    @State private var notes = ""
+    @State private var brand = ""
     @State private var selectedStoreIDs: Set<String> = []
     @State private var duplicateItem: ItemModel? = nil
     @State private var showDuplicateAlert = false
     @State private var pendingName: String = ""
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var itemImage: UIImage?
 
     private var allStores: [StoreModel] {
         dataStore.stores.sorted { $0.name < $1.name }
@@ -29,9 +32,8 @@ struct CreateItemView: View {
                 Section("Item Name") {
                     TextField("e.g. Almond Milk", text: $name)
                 }
-                Section("Notes") {
-                    TextField("Optional notes", text: $notes, axis: .vertical)
-                        .lineLimit(3...6)
+                Section("Brand") {
+                    TextField("e.g. Silk", text: $brand)
                 }
                 Section {
                     if allStores.isEmpty {
@@ -70,6 +72,28 @@ struct CreateItemView: View {
                         Text("This item will automatically be added to \(currentStoreName).")
                     }
                 }
+                Section("Image") {
+                    PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                        if let itemImage {
+                            Image(uiImage: itemImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 180)
+                                .clipped()
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        } else {
+                            Label("Select Photo", systemImage: "photo")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    if itemImage != nil {
+                        Button("Remove Photo", role: .destructive) {
+                            itemImage = nil
+                            selectedPhoto = nil
+                        }
+                    }
+                }
             }
             .navigationTitle("New Item")
             .navigationBarTitleDisplayMode(.inline)
@@ -81,6 +105,14 @@ struct CreateItemView: View {
                     Button("Add") { save() }
                         .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty ||
                                   (!allStores.isEmpty && selectedStoreIDs.isEmpty))
+                }
+            }
+        }
+        .onChange(of: selectedPhoto) { _, newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data) {
+                    itemImage = image.resized(maxDimension: 400)
                 }
             }
         }
@@ -128,12 +160,11 @@ struct CreateItemView: View {
 
     private func performSave() {
         let trimmedName = pendingName.isEmpty ? name.trimmingCharacters(in: .whitespaces).capitalized : pendingName
-        let finalNotes = notes.trimmingCharacters(in: .whitespaces)
+        let brandValue = brand.trimmingCharacters(in: .whitespaces)
+        let finalBrand = brandValue.isEmpty ? nil : brandValue
+        let finalImageData = itemImage?.resized(maxDimension: 400).jpegData(compressionQuality: 0.7)
 
-        let newItem = ItemModel(
-            name: trimmedName,
-            notes: finalNotes.isEmpty ? nil : finalNotes
-        )
+        let newItem = ItemModel(name: trimmedName, brand: finalBrand, imageData: finalImageData)
         dataStore.addItem(newItem)
 
         for storeID in selectedStoreIDs {

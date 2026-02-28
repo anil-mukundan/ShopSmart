@@ -14,8 +14,7 @@ struct AddItemToListView: View {
             let entry = ShoppingListEntryModel(
                 listID: shoppingList.id,
                 itemID: newItem.id,
-                itemName: newItem.name,
-                itemNotes: newItem.notes
+                itemName: newItem.name
             )
             dataStore.addEntry(entry)
             dataStore.incrementFrequency(storeID: currentStore.id, itemID: newItem.id)

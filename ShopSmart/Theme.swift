@@ -79,6 +79,20 @@ struct StoreLogo: View {
     }
 }
 
+// MARK: - UIImage helpers
+
+extension UIImage {
+    func resized(maxDimension: CGFloat) -> UIImage {
+        let scale = maxDimension / max(size.width, size.height)
+        guard scale < 1 else { return self }
+        let newSize = CGSize(width: (size.width * scale).rounded(),
+                             height: (size.height * scale).rounded())
+        return UIGraphicsImageRenderer(size: newSize).image { _ in
+            draw(in: CGRect(origin: .zero, size: newSize))
+        }
+    }
+}
+
 /// Rounded-square icon badge used in list rows.
 struct IconBadge: View {
     let systemName: String

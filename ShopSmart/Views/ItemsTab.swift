@@ -78,13 +78,21 @@ private struct ItemRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            IconBadge(systemName: "tag.fill")
+            if let data = item.imageData, let uiImage = UIImage(data: data) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 34, height: 34)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            } else {
+                IconBadge(systemName: "tag.fill")
+            }
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.name)
                     .font(.headline)
                     .foregroundStyle(.primary)
-                if let notes = item.notes, !notes.isEmpty {
-                    Text(notes)
+                if let brand = item.brand, !brand.isEmpty {
+                    Text(brand)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
