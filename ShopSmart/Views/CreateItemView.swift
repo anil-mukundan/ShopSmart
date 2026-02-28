@@ -61,7 +61,10 @@ struct CreateItemView: View {
                 } header: {
                     Text("Also Available At")
                 } footer: {
-                    if currentStoreID == nil, !currentStoreName.isEmpty {
+                    if !allStores.isEmpty && selectedStoreIDs.isEmpty {
+                        Text("Select at least one store to save this item.")
+                            .foregroundStyle(.red)
+                    } else if currentStoreID == nil, !currentStoreName.isEmpty {
                         Text("This item will automatically be added to \(currentStoreName).")
                     }
                 }
@@ -74,7 +77,8 @@ struct CreateItemView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") { save() }
-                        .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                        .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty ||
+                                  (!allStores.isEmpty && selectedStoreIDs.isEmpty))
                 }
             }
         }

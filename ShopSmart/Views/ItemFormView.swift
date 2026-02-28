@@ -28,7 +28,7 @@ struct ItemFormView: View {
                     TextField("Optional notes", text: $notes, axis: .vertical)
                         .lineLimit(3...6)
                 }
-                Section("Available At") {
+                Section {
                     if allStores.isEmpty {
                         Text("Add stores in the Stores tab first.")
                             .foregroundStyle(.secondary)
@@ -48,6 +48,13 @@ struct ItemFormView: View {
                             .onTapGesture { toggleStore(store) }
                         }
                     }
+                } header: {
+                    Text("Available At")
+                } footer: {
+                    if !allStores.isEmpty && selectedStoreIDs.isEmpty {
+                        Text("Select at least one store to save this item.")
+                            .foregroundStyle(.red)
+                    }
                 }
             }
             .navigationTitle(isEditing ? "Edit Item" : "New Item")
@@ -58,7 +65,8 @@ struct ItemFormView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") { save() }
-                        .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                        .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty ||
+                                  (!allStores.isEmpty && selectedStoreIDs.isEmpty))
                 }
             }
         }
