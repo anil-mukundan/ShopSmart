@@ -150,7 +150,7 @@ struct OnboardingPageData {
         .init(
             icon: "list.bullet.clipboard.fill",
             title: "Build Your Master Item List",
-            body: "Create a master list of everything you regularly buy. For each item you can specify which of your stores carry it, making it easy to build store-specific shopping lists later. You can also add optional details like preferred brand names or a photo of the product — handy when someone else is doing the shopping and needs to find the right item on the shelf.",
+            body: "Create a master list of everything you regularly buy. For each item you can specify which of your stores carry it, making it easy to build store-specific shopping lists later. You can also add optional details like preferred brand names or a photo of the product — handy when someone else is doing the shopping and needs to find the right item on the shelf. When creating a shopping list, you can add notes to individual items to pass along specific instructions to the shopper, such as a preferred size, a substitute brand, or any other helpful details.",
             bullets: []
         ),
         .init(
