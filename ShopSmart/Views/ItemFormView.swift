@@ -29,8 +29,13 @@ struct ItemFormView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Item Name") {
+                Section {
                     TextField("e.g. Organic Milk", text: $name)
+                } header: {
+                    HStack(spacing: 2) {
+                        Text("Item Name")
+                        Text("*").foregroundStyle(.red)
+                    }
                 }
                 Section("Brand") {
                     TextField("e.g. Organic Valley", text: $brand)
@@ -56,7 +61,10 @@ struct ItemFormView: View {
                         }
                     }
                 } header: {
-                    Text("Available At")
+                    HStack(spacing: 2) {
+                        Text("Available At")
+                        Text("*").foregroundStyle(.red)
+                    }
                 } footer: {
                     if !allStores.isEmpty && selectedStoreIDs.isEmpty {
                         Text("Select at least one store to save this item.")

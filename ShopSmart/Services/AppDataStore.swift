@@ -67,7 +67,7 @@ final class AppDataStore {
             let snap = try? await col("shoppingListEntries")
                 .whereField("listID", isEqualTo: id).getDocuments()
             for doc in snap?.documents ?? [] {
-                try? await doc.reference.delete()
+                doc.reference.delete { _ in }
             }
         }
     }
@@ -116,7 +116,7 @@ final class AppDataStore {
     }
 
     private func delete(id: String, from collection: String) {
-        Task { try? await col(collection).document(id).delete() }
+        col(collection).document(id).delete { _ in }
     }
 
     // MARK: - Convenience helpers

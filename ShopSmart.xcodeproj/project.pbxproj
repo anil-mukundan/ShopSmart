@@ -23,6 +23,7 @@
 		A49C1F0FDF14DBECD0832673 /* StoresTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB1CB3B83A6072280DA3A6E8 /* StoresTab.swift */; };
 		A9FB53FB701546B6636221A4 /* ShakeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4DCCACB00B2E1A415095BD /* ShakeDetector.swift */; };
 		B60E719C35F132E8856E5A05 /* AppDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266B450123423A166A8C0298 /* AppDataStore.swift */; };
+		BEA3015AE4A5EB3E94B05BDF /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACAF5B8A6AA42BAFF83894C4 /* OnboardingView.swift */; };
 		C0DF2C5D94D1CF3529A721E3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = ED75DD8A10E69A08AAE4C428 /* GoogleService-Info.plist */; };
 		C11C87F209AA16E87CA74C8E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4AC44869C42891E62B97FC4 /* Assets.xcassets */; };
 		C764E10CAD54B16A171B4A77 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DAF5FAAA7FBBA7C6434E05 /* AuthView.swift */; };
@@ -50,6 +51,7 @@
 		A38380B12A96F0D549B8982F /* StoreFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFormView.swift; sourceTree = "<group>"; };
 		A3DAE6BE8F5DF557619A2916 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		AB55887F6F1BD606F4B87BB1 /* ShopSmart.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ShopSmart.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ACAF5B8A6AA42BAFF83894C4 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		C4AC44869C42891E62B97FC4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D7E61DE5B93B164B67EF09FF /* AddFromStoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFromStoreView.swift; sourceTree = "<group>"; };
 		E5A42B389DC2CA42D9AF5F43 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 				6A064060989EB09E709FC974 /* ItemFormView.swift */,
 				09D35C728E408AB18C66C598 /* ItemsTab.swift */,
 				5129606E62A02A491576B5D4 /* ListsTab.swift */,
+				ACAF5B8A6AA42BAFF83894C4 /* OnboardingView.swift */,
 				385BBA56F6D471F5DA979FF8 /* SettingsTab.swift */,
 				098047C999D48BAC8FE1F951 /* ShoppingListDetailView.swift */,
 				26302285A55AF7C7473C1384 /* ShopTab.swift */,
@@ -233,6 +236,7 @@
 				E25277EAF310EC7B7EFEA19F /* ItemFormView.swift in Sources */,
 				7311D9B91553558DE35AFCED /* ItemsTab.swift in Sources */,
 				1CB96F17AF44971C3A0F4103 /* ListsTab.swift in Sources */,
+				BEA3015AE4A5EB3E94B05BDF /* OnboardingView.swift in Sources */,
 				714A9F08DEAF16F5E0B1ADF5 /* SettingsTab.swift in Sources */,
 				A9FB53FB701546B6636221A4 /* ShakeDetector.swift in Sources */,
 				5E5B95481855EC8BACBFB20A /* ShopSmartApp.swift in Sources */,

@@ -3,11 +3,12 @@ import FirebaseAuth
 @Observable
 final class AuthManager {
     private(set) var user: User? = Auth.auth().currentUser
+    private var listenerHandle: AuthStateDidChangeListenerHandle?
 
     var isSignedIn: Bool { user != nil }
 
     init() {
-        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+        listenerHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             DispatchQueue.main.async { self?.user = user }
         }
     }

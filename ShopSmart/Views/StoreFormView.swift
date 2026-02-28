@@ -28,8 +28,13 @@ struct StoreFormView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Store Name") {
+                Section {
                     TextField("e.g. Whole Foods", text: $name)
+                } header: {
+                    HStack(spacing: 2) {
+                        Text("Store Name")
+                        Text("*").foregroundStyle(.red)
+                    }
                 }
                 Section("Website") {
                     TextField("Enter store URL here", text: $websiteURL)

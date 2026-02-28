@@ -1,11 +1,14 @@
 import SwiftUI
 
 struct ContentView: View {
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @Environment(AuthManager.self) private var authManager
     @State private var selectedTab = 0
 
     var body: some View {
-        if authManager.isSignedIn {
+        if !hasSeenOnboarding {
+            OnboardingView()
+        } else if authManager.isSignedIn {
             TabView(selection: $selectedTab) {
                 ShopTab(selectedTab: $selectedTab)
                     .tabItem { Label("Shop", systemImage: "basket.fill") }
