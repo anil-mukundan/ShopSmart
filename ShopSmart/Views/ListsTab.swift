@@ -3,6 +3,8 @@ import SwiftUI
 struct ListsTab: View {
     @Environment(AppDataStore.self) private var dataStore
 
+    @State private var showHelp = false
+
     private var lists: [ShoppingListModel] {
         dataStore.shoppingLists.sorted { $0.date > $1.date }
     }
@@ -36,6 +38,14 @@ struct ListsTab: View {
                         EditButton()
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showHelp = true } label: {
+                        Image(systemName: "questionmark.circle")
+                    }
+                }
+            }
+            .sheet(isPresented: $showHelp) {
+                OnboardingView(startPage: 5, helpMode: true)
             }
         }
     }

@@ -8,6 +8,7 @@ struct ShopTab: View {
     @State private var itemCounts: [String: Int] = [:]
     @State private var itemNotes: [String: String] = [:]
     @State private var noteEditTarget: NoteEditTarget?
+    @State private var showHelp = false
 
     private var stores: [StoreModel] {
         dataStore.stores.sorted { $0.name < $1.name }
@@ -116,6 +117,16 @@ struct ShopTab: View {
                 }
             }
             .navigationTitle("Shop")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showHelp = true } label: {
+                        Image(systemName: "questionmark.circle")
+                    }
+                }
+            }
+            .sheet(isPresented: $showHelp) {
+                OnboardingView(startPage: 4, helpMode: true)
+            }
         }
         .sheet(item: $noteEditTarget) { target in
             NoteEditorSheet(

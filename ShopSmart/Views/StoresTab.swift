@@ -5,6 +5,7 @@ struct StoresTab: View {
 
     @State private var showAddStore = false
     @State private var storeToEdit: StoreModel?
+    @State private var showHelp = false
 
     private var stores: [StoreModel] {
         dataStore.stores.sorted { $0.name < $1.name }
@@ -40,12 +41,20 @@ struct StoresTab: View {
                         Image(systemName: "plus")
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showHelp = true } label: {
+                        Image(systemName: "questionmark.circle")
+                    }
+                }
             }
             .sheet(isPresented: $showAddStore) {
                 StoreFormView()
             }
             .sheet(item: $storeToEdit) { store in
                 StoreFormView(store: store)
+            }
+            .sheet(isPresented: $showHelp) {
+                OnboardingView(startPage: 2, helpMode: true)
             }
         }
     }

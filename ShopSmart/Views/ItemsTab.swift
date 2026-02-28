@@ -6,6 +6,7 @@ struct ItemsTab: View {
     @State private var showAddItem = false
     @State private var itemToEdit: ItemModel?
     @State private var searchText = ""
+    @State private var showHelp = false
 
     private var items: [ItemModel] {
         dataStore.items.sorted { $0.name < $1.name }
@@ -49,12 +50,20 @@ struct ItemsTab: View {
                         Image(systemName: "plus")
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showHelp = true } label: {
+                        Image(systemName: "questionmark.circle")
+                    }
+                }
             }
             .sheet(isPresented: $showAddItem) {
                 ItemFormView()
             }
             .sheet(item: $itemToEdit) { item in
                 ItemFormView(item: item)
+            }
+            .sheet(isPresented: $showHelp) {
+                OnboardingView(startPage: 3, helpMode: true)
             }
         }
     }

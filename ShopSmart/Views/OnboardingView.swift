@@ -2,10 +2,17 @@ import SwiftUI
 
 struct OnboardingView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
-    @State private var currentPage = 0
+    @Environment(\.dismiss) private var dismiss
+    @State private var currentPage: Int
 
+    private let helpMode: Bool
     private let pages = OnboardingPageData.all
     private var isLastPage: Bool { currentPage == pages.count - 1 }
+
+    init(startPage: Int = 0, helpMode: Bool = false) {
+        _currentPage = State(initialValue: startPage)
+        self.helpMode = helpMode
+    }
 
     var body: some View {
         ZStack {
@@ -20,13 +27,16 @@ struct OnboardingView: View {
         .safeAreaInset(edge: .top) {
             HStack {
                 Spacer()
-                if !isLastPage {
-                    Button("Skip") {
-                        hasSeenOnboarding = true
-                    }
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
+                if helpMode {
+                    Button("Done") { dismiss() }
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                } else if !isLastPage {
+                    Button("Skip") { hasSeenOnboarding = true }
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
                 }
             }
         }
@@ -43,14 +53,14 @@ struct OnboardingView: View {
 
                 Button {
                     if isLastPage {
-                        hasSeenOnboarding = true
+                        if helpMode { dismiss() } else { hasSeenOnboarding = true }
                     } else {
                         withAnimation(.easeInOut(duration: 0.3)) {
                             currentPage += 1
                         }
                     }
                 } label: {
-                    Text(isLastPage ? "Get Started" : "Next")
+                    Text(isLastPage ? (helpMode ? "Done" : "Get Started") : "Next")
                         .frame(maxWidth: .infinity)
                         .fontWeight(.semibold)
                 }
