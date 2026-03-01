@@ -251,7 +251,7 @@ private struct ItemSelectionRow: View {
                         Image(systemName: "minus.circle")
                             .foregroundStyle(.secondary)
                     }
-                    Text("\(count) count")
+                    Text("\(count)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
