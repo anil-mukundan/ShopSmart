@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		133FD6DA8F68BBDB1A594B3B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A81641BDBE03A894327A897A /* PrivacyInfo.xcprivacy */; };
 		16B570F445AB8CB9D2BD97C8 /* AddFromStoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E61DE5B93B164B67EF09FF /* AddFromStoreView.swift */; };
 		1CB96F17AF44971C3A0F4103 /* ListsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5129606E62A02A491576B5D4 /* ListsTab.swift */; };
 		3179A90003AE7E1DDC683A77 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BB90DB27AD566A75E0D5FF /* AuthManager.swift */; };
@@ -50,7 +51,8 @@
 		8A896A43C2434A77108A49AE /* AddItemToListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemToListView.swift; sourceTree = "<group>"; };
 		A38380B12A96F0D549B8982F /* StoreFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreFormView.swift; sourceTree = "<group>"; };
 		A3DAE6BE8F5DF557619A2916 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		AB55887F6F1BD606F4B87BB1 /* ShopSmart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShopSmart.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A81641BDBE03A894327A897A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		AB55887F6F1BD606F4B87BB1 /* ShopSmart.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ShopSmart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACAF5B8A6AA42BAFF83894C4 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		C4AC44869C42891E62B97FC4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D7E61DE5B93B164B67EF09FF /* AddFromStoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFromStoreView.swift; sourceTree = "<group>"; };
@@ -96,6 +98,7 @@
 				C4AC44869C42891E62B97FC4 /* Assets.xcassets */,
 				0D17C4661F5DD525F067A148 /* ContentView.swift */,
 				ED75DD8A10E69A08AAE4C428 /* GoogleService-Info.plist */,
+				A81641BDBE03A894327A897A /* PrivacyInfo.xcprivacy */,
 				1F4DCCACB00B2E1A415095BD /* ShakeDetector.swift */,
 				F93AFD0B1411889EB3D2FA73 /* ShopSmartApp.swift */,
 				E5A42B389DC2CA42D9AF5F43 /* Theme.swift */,
@@ -184,6 +187,11 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					8F44B43C9014D43DBD35C4EE = {
+						DevelopmentTeam = 964Z9H4GC7;
+					};
+				};
 			};
 			buildConfigurationList = 4AF732826A78C3FC871798CE /* Build configuration list for PBXProject "ShopSmart" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -198,6 +206,7 @@
 			packageReferences = (
 				F5E62B2BBDF58980FC3A6BD8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -214,6 +223,7 @@
 				C11C87F209AA16E87CA74C8E /* Assets.xcassets in Resources */,
 				C0DF2C5D94D1CF3529A721E3 /* GoogleService-Info.plist in Resources */,
 				8A7CCCA0B039219ACC0F1C9C /* Preview Assets.xcassets in Resources */,
+				133FD6DA8F68BBDB1A594B3B /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,7 +408,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 964Z9H4GC7;
 				GENERATE_INFOPLIST_FILE = YES;
