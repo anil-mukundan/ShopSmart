@@ -19,6 +19,7 @@
 		4E4544C95870C745697C3D21 /* ShopSmartWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 122796273E3E82FB17E7BC04 /* ShopSmartWatchApp.swift */; };
 		4F8C6DB5BBF18F20FB3D3DFB /* ShopTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26302285A55AF7C7473C1384 /* ShopTab.swift */; };
 		50E606088CFFB157E7B9B983 /* CreateItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B918EF3FBF75302ED40617 /* CreateItemView.swift */; };
+		5787907285F825CF049F56EF /* LocationPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76BCE842B4D1906A074D335 /* LocationPickerSheet.swift */; };
 		5E5B95481855EC8BACBFB20A /* ShopSmartApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F93AFD0B1411889EB3D2FA73 /* ShopSmartApp.swift */; };
 		66BCC15731A65E47E666D2AB /* WatchSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 958DA10FFF978B7F075324B2 /* WatchSession.swift */; };
 		6CE30231E90EFD15377A53A9 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A42B389DC2CA42D9AF5F43 /* Theme.swift */; };
@@ -100,6 +101,7 @@
 		AB55887F6F1BD606F4B87BB1 /* ShopSmart.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ShopSmart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACAF5B8A6AA42BAFF83894C4 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		C4AC44869C42891E62B97FC4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D76BCE842B4D1906A074D335 /* LocationPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPickerSheet.swift; sourceTree = "<group>"; };
 		D7E61DE5B93B164B67EF09FF /* AddFromStoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFromStoreView.swift; sourceTree = "<group>"; };
 		DF461A438A7055041818F541 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
 		E26609BD048F8BF1B32DA964 /* WatchListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchListDetailView.swift; sourceTree = "<group>"; };
@@ -207,6 +209,7 @@
 				6A064060989EB09E709FC974 /* ItemFormView.swift */,
 				09D35C728E408AB18C66C598 /* ItemsTab.swift */,
 				5129606E62A02A491576B5D4 /* ListsTab.swift */,
+				D76BCE842B4D1906A074D335 /* LocationPickerSheet.swift */,
 				220C2745CE06B47A2EDB4734 /* MasterCatalogPickerSheet.swift */,
 				ACAF5B8A6AA42BAFF83894C4 /* OnboardingView.swift */,
 				385BBA56F6D471F5DA979FF8 /* SettingsTab.swift */,
@@ -363,6 +366,7 @@
 				E25277EAF310EC7B7EFEA19F /* ItemFormView.swift in Sources */,
 				7311D9B91553558DE35AFCED /* ItemsTab.swift in Sources */,
 				1CB96F17AF44971C3A0F4103 /* ListsTab.swift in Sources */,
+				5787907285F825CF049F56EF /* LocationPickerSheet.swift in Sources */,
 				AF936A8D0DB5B227B8CBD027 /* MasterCatalogPickerSheet.swift in Sources */,
 				BEA3015AE4A5EB3E94B05BDF /* OnboardingView.swift in Sources */,
 				75DD0417E58992AC176A0E85 /* PhoneSession.swift in Sources */,

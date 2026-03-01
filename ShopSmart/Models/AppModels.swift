@@ -5,6 +5,9 @@ struct StoreModel: Identifiable, Codable, Hashable {
     var name: String
     var websiteURL: String?
     var itemIDs: [String] = []
+    var locationName: String?
+    var latitude: Double?
+    var longitude: Double?
 }
 
 struct ItemModel: Identifiable, Codable, Hashable {

@@ -81,6 +81,12 @@ private struct StoreRow: View {
                 Text("\(count) item\(count == 1 ? "" : "s")")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
+                if let location = store.locationName {
+                    Label(location, systemImage: "mappin")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
             Spacer()
         }
