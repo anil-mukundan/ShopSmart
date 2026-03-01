@@ -8,9 +8,9 @@ struct ShopTab: View {
     @State private var selectedStoreID: String?
     @State private var itemCounts: [String: Int] = [:]
     @State private var itemNotes: [String: String] = [:]
+    @State private var searchText = ""
     @State private var noteEditTarget: NoteEditTarget?
     @State private var showHelp = false
-    @State private var showAddOptions = false
     @State private var showAddFromCatalog = false
     @State private var showCreateItem = false
 
@@ -43,6 +43,11 @@ struct ShopTab: View {
         }
     }
 
+    private var filteredAvailableItems: [ItemModel] {
+        guard !searchText.isEmpty else { return availableItems }
+        return availableItems.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -58,6 +63,7 @@ struct ShopTab: View {
                             }
                         }
                         .onChange(of: selectedStoreID) {
+                            searchText = ""
                             if let existingList = existingListForSelectedStore {
                                 let existingEntries = dataStore.entries(forListID: existingList.id)
                                 var counts: [String: Int] = [:]
@@ -78,21 +84,14 @@ struct ShopTab: View {
 
                 if let store = selectedStore {
                     Section("Items at \(store.name)") {
-                        Button {
-                            showAddOptions = true
-                        } label: {
-                            Label("Add New Item to the Store", systemImage: "plus.circle")
-                        }
-                        .confirmationDialog("Add Item", isPresented: $showAddOptions) {
-                            Button("Add from Master Catalog") { showAddFromCatalog = true }
-                            Button("Create New Item") { showCreateItem = true }
-                        }
                         if availableItems.isEmpty {
                             Text("No items assigned to this store yet.")
                                 .foregroundStyle(.secondary)
                                 .font(.callout)
+                        } else if filteredAvailableItems.isEmpty {
+                            ContentUnavailableView.search(text: searchText)
                         } else {
-                            ForEach(availableItems) { item in
+                            ForEach(filteredAvailableItems) { item in
                                 ItemSelectionRow(
                                     item: item,
                                     count: itemCounts[item.id],
@@ -130,10 +129,25 @@ struct ShopTab: View {
                 }
             }
             .navigationTitle("Shop")
+            .searchable(text: $searchText, prompt: "Search items")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showHelp = true } label: {
                         Image(systemName: "questionmark.circle")
+                    }
+                }
+                if selectedStore != nil {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            Button { showAddFromCatalog = true } label: {
+                                Label("Add from Master Catalog", systemImage: "square.grid.2x2")
+                            }
+                            Button { showCreateItem = true } label: {
+                                Label("Create New Item", systemImage: "plus.circle")
+                            }
+                        } label: {
+                            Image(systemName: "plus")
+                        }
                     }
                 }
                 if !itemCounts.isEmpty {
