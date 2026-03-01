@@ -13,6 +13,7 @@ struct AuthView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var isPasswordVisible = false
+    @State private var resetEmailSent = false
 
     var body: some View {
         NavigationStack {
@@ -77,6 +78,22 @@ struct AuthView: View {
                     .listRowSeparator(.hidden)
                 }
 
+                if !isSignUp {
+                    Section {
+                        Button {
+                            sendReset()
+                        } label: {
+                            Text("Forgot Password?")
+                                .frame(maxWidth: .infinity)
+                                .font(.callout)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(Color.appAccent)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    }
+                }
+
                 Section {
                     Button {
                         isSignUp.toggle()
@@ -94,6 +111,30 @@ struct AuthView: View {
             }
             .navigationTitle("ShopSmart")
             .navigationBarTitleDisplayMode(.large)
+            .alert("Check Your Email", isPresented: $resetEmailSent) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("A password reset link has been sent to \(email). Please check your inbox.")
+            }
+        }
+    }
+
+    private func sendReset() {
+        let trimmed = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            errorMessage = "Please enter your email address first."
+            return
+        }
+        errorMessage = nil
+        isLoading = true
+        Task {
+            do {
+                try await authManager.sendPasswordReset(email: trimmed)
+                resetEmailSent = true
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
         }
     }
 
