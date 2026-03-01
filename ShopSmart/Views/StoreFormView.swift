@@ -16,6 +16,7 @@ struct StoreFormView: View {
     @State private var longitude: Double?
     @State private var showLocationPicker = false
     @State private var showLocationPermissionPrompt = false
+    @State private var showLocationHelp = false
     @State private var showCreateItem = false
     @FocusState private var nameIsFocused: Bool
 
@@ -44,7 +45,7 @@ struct StoreFormView: View {
                         Text("*").foregroundStyle(.red)
                     }
                 }
-                Section("Location") {
+                Section {
                     Button {
                         if locationManager.authorizationStatus == .notDetermined {
                             showLocationPermissionPrompt = true
@@ -81,6 +82,20 @@ struct StoreFormView: View {
                             longitude = nil
                         }
                     }
+                } header: {
+                    HStack {
+                        Text("Location")
+                        Button { showLocationHelp = true } label: {
+                            Image(systemName: "questionmark.circle")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .alert("Location", isPresented: $showLocationHelp) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text("ShopSmart uses your location to sort stores by distance and in a future release will alert you when you arrive at a store.")
                 }
                 Section("Website") {
                     TextField("Enter store URL here", text: $websiteURL)
@@ -217,15 +232,8 @@ private struct LocationPermissionPrompt: View {
             Image(systemName: "location.circle.fill")
                 .font(.system(size: 72))
                 .foregroundStyle(Color.appAccent)
-            VStack(spacing: 12) {
-                Text("Use Your Location?")
-                    .font(.title2.weight(.bold))
-                Text("ShopSmart can sort stores by how close they are to you, and in a future update will alert you when you arrive at a store.")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-            }
+            Text("Use Your Location?")
+                .font(.title2.weight(.bold))
             Spacer()
             VStack(spacing: 12) {
                 Button {
