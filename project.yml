@@ -33,8 +33,10 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
       configs:
         Debug:
+          CODE_SIGN_STYLE: Automatic
           CODE_SIGN_IDENTITY: "iPhone Developer"
         Release:
+          CODE_SIGN_STYLE: Automatic
           CODE_SIGN_IDENTITY: "Apple Distribution"
 schemes:
   ShopSmart:
