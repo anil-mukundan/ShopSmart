@@ -123,6 +123,15 @@ struct ShopTab: View {
                         Image(systemName: "questionmark.circle")
                     }
                 }
+                if !itemCounts.isEmpty {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: saveList) {
+                            Image(systemName: existingListForSelectedStore != nil
+                                  ? "arrow.triangle.2.circlepath"
+                                  : "square.and.arrow.down")
+                        }
+                    }
+                }
             }
             .sheet(isPresented: $showHelp) {
                 OnboardingView(startPage: 4, helpMode: true)
