@@ -83,7 +83,7 @@ struct ShopTab: View {
                             Label("Add New Item to the Store", systemImage: "plus.circle")
                         }
                         .confirmationDialog("Add Item", isPresented: $showAddOptions) {
-                            Button("Add from Store Catalog") { showAddFromCatalog = true }
+                            Button("Add from Master Catalog") { showAddFromCatalog = true }
                             Button("Create New Item") { showCreateItem = true }
                         }
                         if availableItems.isEmpty {
@@ -150,7 +150,9 @@ struct ShopTab: View {
             }
             .sheet(isPresented: $showAddFromCatalog) {
                 if let store = selectedStore {
-                    ShopCatalogPickerSheet(store: store, itemCounts: $itemCounts)
+                    MasterCatalogPickerSheet(store: store) { newItems in
+                        for item in newItems { itemCounts[item.id] = 1 }
+                    }
                 }
             }
             .sheet(isPresented: $showCreateItem) {
@@ -364,89 +366,6 @@ private struct NoteEditorSheet: View {
     }
 }
 
-// MARK: - Shop Catalog Picker Sheet
-
-private struct ShopCatalogPickerSheet: View {
-    @Environment(AppDataStore.self) private var dataStore
-    @Environment(\.dismiss) private var dismiss
-
-    let store: StoreModel
-    @Binding var itemCounts: [String: Int]
-
-    @State private var selectedIDs: Set<String> = []
-
-    private var candidates: [ItemModel] {
-        var freqMap: [String: Int] = [:]
-        for freq in dataStore.frequencies where freq.storeID == store.id {
-            freqMap[freq.itemID, default: 0] += freq.count
-        }
-        return dataStore.items(for: store)
-            .filter { itemCounts[$0.id] == nil }
-            .sorted { a, b in
-                let fa = freqMap[a.id, default: 0]
-                let fb = freqMap[b.id, default: 0]
-                if fa != fb { return fa > fb }
-                return a.name < b.name
-            }
-    }
-
-    var body: some View {
-        NavigationStack {
-            Group {
-                if candidates.isEmpty {
-                    ContentUnavailableView(
-                        "All Items Added",
-                        systemImage: "checkmark.circle",
-                        description: Text("Every item available at \(store.name) is already on your list.")
-                    )
-                } else {
-                    List {
-                        ForEach(candidates) { item in
-                            HStack(spacing: 12) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(item.name)
-                                        .font(.headline)
-                                        .foregroundStyle(.primary)
-                                    if let brand = item.brand, !brand.isEmpty {
-                                        Text(brand)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                                Spacer()
-                                Image(systemName: selectedIDs.contains(item.id) ? "checkmark.circle.fill" : "circle")
-                                    .foregroundStyle(selectedIDs.contains(item.id) ? Color.appAccent : Color.secondary)
-                                    .font(.title3)
-                                    .animation(.easeInOut(duration: 0.15), value: selectedIDs.contains(item.id))
-                            }
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                if selectedIDs.contains(item.id) { selectedIDs.remove(item.id) }
-                                else { selectedIDs.insert(item.id) }
-                            }
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Add from \(store.name)")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Add (\(selectedIDs.count))") {
-                        for id in selectedIDs { itemCounts[id] = 1 }
-                        dismiss()
-                    }
-                    .disabled(selectedIDs.isEmpty)
-                }
-            }
-        }
-    }
-}
 
 #Preview {
     ShopTab(selectedTab: .constant(0))

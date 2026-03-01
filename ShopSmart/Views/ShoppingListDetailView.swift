@@ -10,6 +10,7 @@ struct ShoppingListDetailView: View {
     @State private var showIncompleteDeleteWarning = false
     @State private var showAddItem = false
     @State private var showAddFromStore = false
+    @State private var showAddFromMaster = false
     @State private var editMode: EditMode = .inactive
 
     private var store: StoreModel? {
@@ -72,6 +73,21 @@ struct ShoppingListDetailView: View {
                 AddFromStoreView(shoppingList: shoppingList, store: store)
             }
         }
+        .sheet(isPresented: $showAddFromMaster) {
+            if let store {
+                MasterCatalogPickerSheet(store: store) { newItems in
+                    for item in newItems {
+                        let entry = ShoppingListEntryModel(
+                            listID: shoppingList.id,
+                            itemID: item.id,
+                            itemName: item.name
+                        )
+                        dataStore.addEntry(entry)
+                        dataStore.incrementFrequency(storeID: store.id, itemID: item.id)
+                    }
+                }
+            }
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack(spacing: 16) {
@@ -91,6 +107,9 @@ struct ShoppingListDetailView: View {
                             Menu {
                                 Button { showAddFromStore = true } label: {
                                     Label("Add from Store Catalog", systemImage: "cart.badge.plus")
+                                }
+                                Button { showAddFromMaster = true } label: {
+                                    Label("Add from Master Catalog", systemImage: "square.grid.2x2")
                                 }
                                 Button { showAddItem = true } label: {
                                     Label("Create New Item", systemImage: "plus.circle")
