@@ -9,6 +9,8 @@ struct ShopTab: View {
     @State private var itemNotes: [String: String] = [:]
     @State private var noteEditTarget: NoteEditTarget?
     @State private var showHelp = false
+    @State private var showAddOptions = false
+    @State private var showAddFromCatalog = false
     @State private var showCreateItem = false
 
     private var stores: [StoreModel] {
@@ -43,7 +45,7 @@ struct ShopTab: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Store") {
+                Section("Create a Shopping List") {
                     if stores.isEmpty {
                         Text("Add stores in the Stores tab first.")
                             .foregroundStyle(.secondary)
@@ -76,9 +78,13 @@ struct ShopTab: View {
                 if let store = selectedStore {
                     Section("Items at \(store.name)") {
                         Button {
-                            showCreateItem = true
+                            showAddOptions = true
                         } label: {
-                            Label("Create New Item…", systemImage: "plus.circle")
+                            Label("Add New Item to the Store", systemImage: "plus.circle")
+                        }
+                        .confirmationDialog("Add Item", isPresented: $showAddOptions) {
+                            Button("Add from Store Catalog") { showAddFromCatalog = true }
+                            Button("Create New Item") { showCreateItem = true }
                         }
                         if availableItems.isEmpty {
                             Text("No items assigned to this store yet.")
@@ -141,6 +147,11 @@ struct ShopTab: View {
             }
             .sheet(isPresented: $showHelp) {
                 OnboardingView(startPage: 4, helpMode: true)
+            }
+            .sheet(isPresented: $showAddFromCatalog) {
+                if let store = selectedStore {
+                    ShopCatalogPickerSheet(store: store, itemCounts: $itemCounts)
+                }
             }
             .sheet(isPresented: $showCreateItem) {
                 if let store = selectedStore {
@@ -350,6 +361,90 @@ private struct NoteEditorSheet: View {
         }
         .presentationDetents([.medium])
         .onAppear { isFocused = true }
+    }
+}
+
+// MARK: - Shop Catalog Picker Sheet
+
+private struct ShopCatalogPickerSheet: View {
+    @Environment(AppDataStore.self) private var dataStore
+    @Environment(\.dismiss) private var dismiss
+
+    let store: StoreModel
+    @Binding var itemCounts: [String: Int]
+
+    @State private var selectedIDs: Set<String> = []
+
+    private var candidates: [ItemModel] {
+        var freqMap: [String: Int] = [:]
+        for freq in dataStore.frequencies where freq.storeID == store.id {
+            freqMap[freq.itemID, default: 0] += freq.count
+        }
+        return dataStore.items(for: store)
+            .filter { itemCounts[$0.id] == nil }
+            .sorted { a, b in
+                let fa = freqMap[a.id, default: 0]
+                let fb = freqMap[b.id, default: 0]
+                if fa != fb { return fa > fb }
+                return a.name < b.name
+            }
+    }
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if candidates.isEmpty {
+                    ContentUnavailableView(
+                        "All Items Added",
+                        systemImage: "checkmark.circle",
+                        description: Text("Every item available at \(store.name) is already on your list.")
+                    )
+                } else {
+                    List {
+                        ForEach(candidates) { item in
+                            HStack(spacing: 12) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(item.name)
+                                        .font(.headline)
+                                        .foregroundStyle(.primary)
+                                    if let brand = item.brand, !brand.isEmpty {
+                                        Text(brand)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                                Spacer()
+                                Image(systemName: selectedIDs.contains(item.id) ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(selectedIDs.contains(item.id) ? Color.appAccent : Color.secondary)
+                                    .font(.title3)
+                                    .animation(.easeInOut(duration: 0.15), value: selectedIDs.contains(item.id))
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                if selectedIDs.contains(item.id) { selectedIDs.remove(item.id) }
+                                else { selectedIDs.insert(item.id) }
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Add from \(store.name)")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add (\(selectedIDs.count))") {
+                        for id in selectedIDs { itemCounts[id] = 1 }
+                        dismiss()
+                    }
+                    .disabled(selectedIDs.isEmpty)
+                }
+            }
+        }
     }
 }
 
