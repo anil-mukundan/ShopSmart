@@ -147,9 +147,20 @@ struct CreateItemView: View {
     private func save() {
         pendingName = name.trimmingCharacters(in: .whitespaces).capitalized
 
-        if let existing = allItems.first(where: {
-            isSimilarItemName($0.name, pendingName)
-        }) {
+        if let existing = allItems.first(where: { isSimilarItemName($0.name, pendingName) }) {
+            // If the item exists but isn't available at the current store, silently
+            // add the store association instead of creating a duplicate.
+            if let storeID = currentStoreID,
+               let store = dataStore.stores.first(where: { $0.id == storeID }),
+               !store.itemIDs.contains(existing.id) {
+                var updated = store
+                updated.itemIDs.append(existing.id)
+                dataStore.updateStore(updated)
+                onItemCreated(existing)
+                dismiss()
+                return
+            }
+            // Duplicate already available at this store — let the user decide.
             duplicateItem = existing
             showDuplicateAlert = true
             return

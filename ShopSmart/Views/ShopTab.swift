@@ -9,6 +9,7 @@ struct ShopTab: View {
     @State private var itemNotes: [String: String] = [:]
     @State private var noteEditTarget: NoteEditTarget?
     @State private var showHelp = false
+    @State private var showCreateItem = false
 
     private var stores: [StoreModel] {
         dataStore.stores.sorted { $0.name < $1.name }
@@ -74,8 +75,13 @@ struct ShopTab: View {
 
                 if let store = selectedStore {
                     Section("Items at \(store.name)") {
+                        Button {
+                            showCreateItem = true
+                        } label: {
+                            Label("Create New Item…", systemImage: "plus.circle")
+                        }
                         if availableItems.isEmpty {
-                            Text("No items assigned to this store.\nAssign items in the Items tab.")
+                            Text("No items assigned to this store yet.")
                                 .foregroundStyle(.secondary)
                                 .font(.callout)
                         } else {
@@ -135,6 +141,16 @@ struct ShopTab: View {
             }
             .sheet(isPresented: $showHelp) {
                 OnboardingView(startPage: 4, helpMode: true)
+            }
+            .sheet(isPresented: $showCreateItem) {
+                if let store = selectedStore {
+                    CreateItemView(
+                        currentStoreName: store.name,
+                        currentStoreID: store.id
+                    ) { newItem in
+                        itemCounts[newItem.id] = 1
+                    }
+                }
             }
         }
         .sheet(item: $noteEditTarget) { target in
