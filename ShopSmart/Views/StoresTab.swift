@@ -2,13 +2,14 @@ import SwiftUI
 
 struct StoresTab: View {
     @Environment(AppDataStore.self) private var dataStore
+    @Environment(LocationManager.self) private var locationManager
 
     @State private var showAddStore = false
     @State private var storeToEdit: StoreModel?
     @State private var showHelp = false
 
     private var stores: [StoreModel] {
-        dataStore.stores.sorted { $0.name < $1.name }
+        locationManager.sorted(dataStore.stores)
     }
 
     var body: some View {
@@ -69,6 +70,7 @@ struct StoresTab: View {
 private struct StoreRow: View {
     let store: StoreModel
     @Environment(AppDataStore.self) private var dataStore
+    @Environment(LocationManager.self) private var locationManager
 
     var body: some View {
         HStack(spacing: 12) {
@@ -82,10 +84,18 @@ private struct StoreRow: View {
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
                 if let location = store.locationName {
-                    Label(location, systemImage: "mappin")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                    HStack(spacing: 4) {
+                        Label(location, systemImage: "mappin")
+                            .lineLimit(1)
+                        if let dist = locationManager.distanceString(to: store) {
+                            Text("·")
+                            Text(dist)
+                                .fontWeight(.medium)
+                                .foregroundStyle(Color.appAccent)
+                        }
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
                 }
             }
             Spacer()

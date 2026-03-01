@@ -2,6 +2,7 @@ import SwiftUI
 
 struct StoreFormView: View {
     @Environment(AppDataStore.self) private var dataStore
+    @Environment(LocationManager.self) private var locationManager
     @Environment(\.dismiss) private var dismiss
 
     var store: StoreModel?
@@ -14,6 +15,7 @@ struct StoreFormView: View {
     @State private var latitude: Double?
     @State private var longitude: Double?
     @State private var showLocationPicker = false
+    @State private var showLocationPermissionPrompt = false
     @State private var showCreateItem = false
     @FocusState private var nameIsFocused: Bool
 
@@ -43,7 +45,13 @@ struct StoreFormView: View {
                     }
                 }
                 Section("Location") {
-                    Button { showLocationPicker = true } label: {
+                    Button {
+                        if locationManager.authorizationStatus == .notDetermined {
+                            showLocationPermissionPrompt = true
+                        } else {
+                            showLocationPicker = true
+                        }
+                    } label: {
                         Label {
                             if let name = locationName {
                                 Text(name)
@@ -137,6 +145,13 @@ struct StoreFormView: View {
                 nameIsFocused = true
             }
         }
+        .sheet(isPresented: $showLocationPermissionPrompt, onDismiss: {
+            showLocationPicker = true
+        }) {
+            LocationPermissionPrompt {
+                locationManager.requestPermission()
+            }
+        }
         .sheet(isPresented: $showLocationPicker) {
             LocationPickerSheet(initialQuery: name) { locName, lat, lon in
                 locationName = locName
@@ -190,7 +205,54 @@ struct StoreFormView: View {
     }
 }
 
+// MARK: - Location Permission Prompt
+
+private struct LocationPermissionPrompt: View {
+    let onAllow: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(spacing: 28) {
+            Spacer()
+            Image(systemName: "location.circle.fill")
+                .font(.system(size: 72))
+                .foregroundStyle(Color.appAccent)
+            VStack(spacing: 12) {
+                Text("Use Your Location?")
+                    .font(.title2.weight(.bold))
+                Text("ShopSmart can sort stores by how close they are to you, and in a future update will alert you when you arrive at a store.")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+            Spacer()
+            VStack(spacing: 12) {
+                Button {
+                    onAllow()
+                    dismiss()
+                } label: {
+                    Label("Allow Location Access", systemImage: "location.fill")
+                        .frame(maxWidth: .infinity)
+                        .fontWeight(.semibold)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.appAccent)
+                .controlSize(.large)
+
+                Button("Not Now") { dismiss() }
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal)
+            .padding(.bottom)
+        }
+        .presentationDetents([.medium])
+        .presentationDragIndicator(.visible)
+    }
+}
+
 #Preview {
     StoreFormView()
         .environment(AppDataStore.preview)
+        .environment(LocationManager())
 }

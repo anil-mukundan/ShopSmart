@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ShopTab: View {
     @Environment(AppDataStore.self) private var dataStore
+    @Environment(LocationManager.self) private var locationManager
 
     @Binding var selectedTab: Int
     @State private var selectedStoreID: String?
@@ -14,7 +15,7 @@ struct ShopTab: View {
     @State private var showCreateItem = false
 
     private var stores: [StoreModel] {
-        dataStore.stores.sorted { $0.name < $1.name }
+        locationManager.sorted(dataStore.stores)
     }
 
     private var selectedStore: StoreModel? {

@@ -5,6 +5,7 @@ import FirebaseCore
 struct ShopSmartApp: App {
     @State private var authManager: AuthManager
     @State private var dataStore: AppDataStore
+    @State private var locationManager = LocationManager()
     private let phoneSession = PhoneSession()
 
     init() {
@@ -19,6 +20,7 @@ struct ShopSmartApp: App {
                 .tint(.appAccent)
                 .environment(authManager)
                 .environment(dataStore)
+                .environment(locationManager)
                 .task {
                     phoneSession.configure(dataStore: dataStore)
                     if let uid = authManager.user?.uid {

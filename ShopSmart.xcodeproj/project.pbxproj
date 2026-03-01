@@ -11,6 +11,7 @@
 		133FD6DA8F68BBDB1A594B3B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A81641BDBE03A894327A897A /* PrivacyInfo.xcprivacy */; };
 		16B570F445AB8CB9D2BD97C8 /* AddFromStoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E61DE5B93B164B67EF09FF /* AddFromStoreView.swift */; };
 		1CB96F17AF44971C3A0F4103 /* ListsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5129606E62A02A491576B5D4 /* ListsTab.swift */; };
+		1D6E239F7E993358AC78E159 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18776D12B3026B0641061578 /* LocationManager.swift */; };
 		1E51F188B52507097CE4F58E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6A21ADCA0E4F8F448F19C3FE /* Assets.xcassets */; };
 		3179A90003AE7E1DDC683A77 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BB90DB27AD566A75E0D5FF /* AuthManager.swift */; };
 		3561F15FF9BFA1B7BA4B114D /* WatchListsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52D51AE228E18041FC5A0EF /* WatchListsView.swift */; };
@@ -77,6 +78,7 @@
 		09D35C728E408AB18C66C598 /* ItemsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemsTab.swift; sourceTree = "<group>"; };
 		0D17C4661F5DD525F067A148 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		122796273E3E82FB17E7BC04 /* ShopSmartWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopSmartWatchApp.swift; sourceTree = "<group>"; };
+		18776D12B3026B0641061578 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		1F4DCCACB00B2E1A415095BD /* ShakeDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeDetector.swift; sourceTree = "<group>"; };
 		220C2745CE06B47A2EDB4734 /* MasterCatalogPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterCatalogPickerSheet.swift; sourceTree = "<group>"; };
 		26302285A55AF7C7473C1384 /* ShopTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShopTab.swift; sourceTree = "<group>"; };
@@ -226,6 +228,7 @@
 			children = (
 				266B450123423A166A8C0298 /* AppDataStore.swift */,
 				53BB90DB27AD566A75E0D5FF /* AuthManager.swift */,
+				18776D12B3026B0641061578 /* LocationManager.swift */,
 				92601FA359710AD49E7F5ECE /* PhoneSession.swift */,
 			);
 			path = Services;
@@ -366,6 +369,7 @@
 				E25277EAF310EC7B7EFEA19F /* ItemFormView.swift in Sources */,
 				7311D9B91553558DE35AFCED /* ItemsTab.swift in Sources */,
 				1CB96F17AF44971C3A0F4103 /* ListsTab.swift in Sources */,
+				1D6E239F7E993358AC78E159 /* LocationManager.swift in Sources */,
 				5787907285F825CF049F56EF /* LocationPickerSheet.swift in Sources */,
 				AF936A8D0DB5B227B8CBD027 /* MasterCatalogPickerSheet.swift in Sources */,
 				BEA3015AE4A5EB3E94B05BDF /* OnboardingView.swift in Sources */,
@@ -574,6 +578,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 964Z9H4GC7;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "ShopSmart uses your location to sort stores by distance and will alert you when you arrive at a store.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -599,6 +604,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 964Z9H4GC7;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "ShopSmart uses your location to sort stores by distance and will alert you when you arrive at a store.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
