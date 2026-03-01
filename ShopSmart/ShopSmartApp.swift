@@ -5,6 +5,7 @@ import FirebaseCore
 struct ShopSmartApp: App {
     @State private var authManager: AuthManager
     @State private var dataStore: AppDataStore
+    private let phoneSession = PhoneSession()
 
     init() {
         FirebaseApp.configure()
@@ -19,6 +20,7 @@ struct ShopSmartApp: App {
                 .environment(authManager)
                 .environment(dataStore)
                 .task {
+                    phoneSession.configure(dataStore: dataStore)
                     if let uid = authManager.user?.uid {
                         dataStore.startListening(uid: uid)
                     }
@@ -27,6 +29,9 @@ struct ShopSmartApp: App {
                     if let uid { dataStore.startListening(uid: uid) }
                     else { dataStore.stopListening() }
                 }
+                .onChange(of: dataStore.shoppingLists) { _, _ in phoneSession.pushToWatch() }
+                .onChange(of: dataStore.entries)       { _, _ in phoneSession.pushToWatch() }
+                .onChange(of: dataStore.items)         { _, _ in phoneSession.pushToWatch() }
         }
     }
 }

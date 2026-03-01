@@ -14,14 +14,14 @@ struct ItemModel: Identifiable, Codable, Hashable {
     var imageData: Data?
 }
 
-struct ShoppingListModel: Identifiable, Codable {
+struct ShoppingListModel: Identifiable, Codable, Equatable {
     var id: String = UUID().uuidString
     var storeID: String
     var storeName: String
     var date: Date = .now
 }
 
-struct ShoppingListEntryModel: Identifiable, Codable {
+struct ShoppingListEntryModel: Identifiable, Codable, Equatable {
     var id: String = UUID().uuidString
     var listID: String
     var itemID: String
