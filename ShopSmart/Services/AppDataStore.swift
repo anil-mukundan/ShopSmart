@@ -82,6 +82,7 @@ final class AppDataStore {
         guard let idx = entries.firstIndex(where: { $0.id == id }) else { return }
         var updated = entries[idx]
         updated.isInCart.toggle()
+        entries[idx] = updated  // optimistic update so animation fires immediately
         updateEntry(updated)
     }
 
@@ -140,6 +141,7 @@ final class AppDataStore {
             orderMap[freq.itemID] = freq.sortOrder
         }
         return listEntries.sorted { a, b in
+            if a.isInCart != b.isInCart { return !a.isInCart }
             let oa = orderMap[a.itemID] ?? Int.max
             let ob = orderMap[b.itemID] ?? Int.max
             if oa != ob { return oa < ob }
