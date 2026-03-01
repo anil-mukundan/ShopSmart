@@ -301,27 +301,39 @@ private struct NoteEditorSheet: View {
     let itemName: String
     @Binding var note: String
     @Environment(\.dismiss) private var dismiss
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         NavigationStack {
-            TextEditor(text: $note)
-                .padding(.horizontal)
-                .navigationTitle(itemName)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Clear", role: .destructive) {
-                            note = ""
-                            dismiss()
-                        }
-                        .disabled(note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") { dismiss() }
-                    }
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $note)
+                    .padding(.horizontal)
+                    .focused($isFocused)
+                if note.isEmpty {
+                    Text("Leave a note for the shopper about this item")
+                        .foregroundStyle(.tertiary)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
+                        .allowsHitTesting(false)
                 }
+            }
+            .navigationTitle(itemName)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Clear", role: .destructive) {
+                        note = ""
+                        dismiss()
+                    }
+                    .disabled(note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
         }
         .presentationDetents([.medium])
+        .onAppear { isFocused = true }
     }
 }
 
