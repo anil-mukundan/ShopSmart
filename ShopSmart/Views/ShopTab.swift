@@ -9,6 +9,7 @@ struct ShopTab: View {
     @State private var itemCounts: [String: Int] = [:]
     @State private var itemNotes: [String: String] = [:]
     @State private var searchText = ""
+    @FocusState private var searchIsFocused: Bool
     @State private var noteEditTarget: NoteEditTarget?
     @State private var showHelp = false
     @State private var showAddFromCatalog = false
@@ -136,8 +137,12 @@ struct ShopTab: View {
                             .foregroundStyle(.secondary)
                         TextField("Search items", text: $searchText)
                             .autocorrectionDisabled()
-                        if !searchText.isEmpty {
-                            Button { searchText = "" } label: {
+                            .focused($searchIsFocused)
+                        if searchIsFocused || !searchText.isEmpty {
+                            Button {
+                                searchText = ""
+                                searchIsFocused = false
+                            } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundStyle(.secondary)
                             }
