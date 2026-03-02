@@ -6,6 +6,7 @@ struct ItemsTab: View {
     @State private var showAddItem = false
     @State private var itemToEdit: ItemModel?
     @State private var searchText = ""
+    @FocusState private var searchIsFocused: Bool
     @State private var showHelp = false
 
     private var items: [ItemModel] {
@@ -40,7 +41,28 @@ struct ItemsTab: View {
                     ContentUnavailableView.search(text: searchText)
                 }
             }
-            .searchable(text: $searchText, prompt: "Search items")
+            .safeAreaInset(edge: .bottom) {
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                    TextField("Search items", text: $searchText)
+                        .autocorrectionDisabled()
+                        .focused($searchIsFocused)
+                    if searchIsFocused || !searchText.isEmpty {
+                        Button {
+                            searchText = ""
+                            searchIsFocused = false
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(.bar)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     EditButton()
