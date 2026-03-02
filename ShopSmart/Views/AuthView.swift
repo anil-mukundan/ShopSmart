@@ -109,7 +109,7 @@ struct AuthView: View {
                     .listRowSeparator(.hidden)
                 }
             }
-            .navigationTitle("ShopSmart")
+            .navigationTitle("ShopSmartly")
             .navigationBarTitleDisplayMode(.large)
             .alert("Check Your Email", isPresented: $resetEmailSent) {
                 Button("OK", role: .cancel) { }

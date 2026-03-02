@@ -135,8 +135,8 @@ struct OnboardingPageData {
     static let all: [OnboardingPageData] = [
         .init(
             icon: "cart.fill",
-            title: "Welcome to ShopSmart",
-            body: "ShopSmart makes grocery shopping effortless by organising your shopping lists around the stores you love. Getting started is easy:",
+            title: "Welcome to ShopSmartly",
+            body: "ShopSmartly makes grocery shopping effortless by organising your shopping lists around the stores you love. Getting started is easy:",
             bullets: [
                 "Create your account",
                 "Add the stores you shop at",
@@ -166,13 +166,13 @@ struct OnboardingPageData {
         .init(
             icon: "checklist",
             title: "Smart Shopping Lists",
-            body: "When you're ready to shop, create a list for a specific store and you'll only see items available at that store — no clutter, no confusion. As you use ShopSmart over time, the app learns which items you order most frequently from each store and puts them front and centre, so building your list gets faster every time.",
+            body: "When you're ready to shop, create a list for a specific store and you'll only see items available at that store — no clutter, no confusion. As you use ShopSmartly over time, the app learns which items you order most frequently from each store and puts them front and centre, so building your list gets faster every time.",
             bullets: []
         ),
         .init(
             icon: "figure.walk",
             title: "Shop Your Way",
-            body: "Reorder items in your shopping list to match the layout of the store and the route you naturally take through it. Once you've set your preferred order, ShopSmart remembers it for future lists at that store — so you can move through the aisles efficiently every time, without backtracking.",
+            body: "Reorder items in your shopping list to match the layout of the store and the route you naturally take through it. Once you've set your preferred order, ShopSmartly remembers it for future lists at that store — so you can move through the aisles efficiently every time, without backtracking.",
             bullets: []
         )
     ]

@@ -95,7 +95,7 @@ struct StoreFormView: View {
                 .alert("Location", isPresented: $showLocationHelp) {
                     Button("OK", role: .cancel) { }
                 } message: {
-                    Text("ShopSmart uses your location to sort stores by distance and in a future release will alert you when you arrive at a store.")
+                    Text("ShopSmartly uses your location to sort stores by distance and in a future release will alert you when you arrive at a store.")
                 }
                 Section("Website") {
                     TextField("Enter store URL here", text: $websiteURL)

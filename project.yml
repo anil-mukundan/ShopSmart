@@ -32,7 +32,8 @@ targets:
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
-        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "ShopSmart uses your location to sort stores by distance and will alert you when you arrive at a store."
+        INFOPLIST_KEY_CFBundleDisplayName: ShopSmartly
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "ShopSmartly uses your location to sort stores by distance and will alert you when you arrive at a store."
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
       configs:
@@ -57,7 +58,7 @@ targets:
         DEVELOPMENT_TEAM: 964Z9H4GC7
         SWIFT_VERSION: "5.9"
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: ShopSmart
+        INFOPLIST_KEY_CFBundleDisplayName: ShopSmartly
         INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.anil.mukundan.ShopSmart
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         MARKETING_VERSION: "1.0"
