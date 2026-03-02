@@ -129,7 +129,26 @@ struct ShopTab: View {
                 }
             }
             .navigationTitle("Shop")
-            .if(selectedStoreID != nil) { $0.searchable(text: $searchText, prompt: "Search items") }
+            .if(selectedStoreID != nil) {
+                $0.safeAreaInset(edge: .bottom) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(.secondary)
+                        TextField("Search items", text: $searchText)
+                            .autocorrectionDisabled()
+                        if !searchText.isEmpty {
+                            Button { searchText = "" } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(.bar)
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showHelp = true } label: {
