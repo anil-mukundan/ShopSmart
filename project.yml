@@ -75,6 +75,7 @@ schemes:
     build:
       targets:
         ShopSmart: all
+        ShopSmartWatch: all
     run:
       config: Debug
     test:
