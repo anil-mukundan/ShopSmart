@@ -114,7 +114,7 @@ struct AuthView: View {
             .alert("Check Your Email", isPresented: $resetEmailSent) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("A password reset link has been sent to \(email). Please check your inbox.")
+                Text("A password reset link has been sent to \(email). Please check your inbox — if you don't see it, check your spam or junk folder.")
             }
         }
     }
