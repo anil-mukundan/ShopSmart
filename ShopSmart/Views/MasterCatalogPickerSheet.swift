@@ -8,11 +8,17 @@ struct MasterCatalogPickerSheet: View {
     let onAdd: ([ItemModel]) -> Void
 
     @State private var selectedIDs: Set<String> = []
+    @State private var searchText = ""
 
     private var candidates: [ItemModel] {
         dataStore.items
             .filter { !store.itemIDs.contains($0.id) }
             .sorted { $0.name < $1.name }
+    }
+
+    private var filteredCandidates: [ItemModel] {
+        guard !searchText.isEmpty else { return candidates }
+        return candidates.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
 
     var body: some View {
@@ -24,9 +30,11 @@ struct MasterCatalogPickerSheet: View {
                         systemImage: "checkmark.circle",
                         description: Text("Every item in your catalog is already available at \(store.name).")
                     )
+                } else if filteredCandidates.isEmpty {
+                    ContentUnavailableView.search(text: searchText)
                 } else {
                     List {
-                        ForEach(candidates) { item in
+                        ForEach(filteredCandidates) { item in
                             HStack(spacing: 12) {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(item.name)
@@ -55,6 +63,7 @@ struct MasterCatalogPickerSheet: View {
                     }
                 }
             }
+            .searchable(text: $searchText, prompt: "Search items")
             .navigationTitle("Master Catalog")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

@@ -8,6 +8,7 @@ struct AddFromStoreView: View {
     let store: StoreModel
 
     @State private var selectedItemIDs: Set<String> = []
+    @State private var searchText = ""
 
     private var candidateItems: [ItemModel] {
         let existingIDs = Set(dataStore.entries(forListID: shoppingList.id).map(\.itemID))
@@ -27,6 +28,11 @@ struct AddFromStoreView: View {
             }
     }
 
+    private var filteredCandidateItems: [ItemModel] {
+        guard !searchText.isEmpty else { return candidateItems }
+        return candidateItems.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -36,9 +42,11 @@ struct AddFromStoreView: View {
                         systemImage: "checkmark.circle",
                         description: Text("Every item available at \(store.name) is already on this list.")
                     )
+                } else if filteredCandidateItems.isEmpty {
+                    ContentUnavailableView.search(text: searchText)
                 } else {
                     List {
-                        ForEach(candidateItems, id: \.id) { item in
+                        ForEach(filteredCandidateItems, id: \.id) { item in
                             HStack(spacing: 12) {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(item.name)
@@ -64,6 +72,7 @@ struct AddFromStoreView: View {
                     }
                 }
             }
+            .searchable(text: $searchText, prompt: "Search items")
             .navigationTitle("Add from \(store.name)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
