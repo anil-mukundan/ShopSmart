@@ -24,6 +24,15 @@ func isSimilarItemName(_ a: String, _ b: String) -> Bool {
     return false
 }
 
+// MARK: - Conditional View Modifier
+
+extension View {
+    @ViewBuilder
+    func `if`(_ condition: Bool, transform: (Self) -> some View) -> some View {
+        if condition { transform(self) } else { self }
+    }
+}
+
 // MARK: - Store Logo
 
 /// Builds a DuckDuckGo favicon URL from a store website URL string.

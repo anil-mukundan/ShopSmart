@@ -84,19 +84,6 @@ struct ShopTab: View {
 
                 if let store = selectedStore {
                     Section("Items at \(store.name)") {
-                        HStack(spacing: 8) {
-                            Image(systemName: "magnifyingglass")
-                                .foregroundStyle(.secondary)
-                            TextField("Search items", text: $searchText)
-                                .autocorrectionDisabled()
-                            if !searchText.isEmpty {
-                                Button { searchText = "" } label: {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundStyle(.secondary)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
                         if availableItems.isEmpty {
                             Text("No items assigned to this store yet.")
                                 .foregroundStyle(.secondary)
@@ -142,6 +129,7 @@ struct ShopTab: View {
                 }
             }
             .navigationTitle("Shop")
+            .if(selectedStoreID != nil) { $0.searchable(text: $searchText, prompt: "Search items") }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showHelp = true } label: {
